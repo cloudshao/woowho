@@ -16,3 +16,13 @@ export let allPeople = [
     "faces/patrickstewart1.png",
     "faces/patrickstewart1.png"]),
 ];
+
+export function deserializePeople(json) {
+  const obj = JSON.parse(json);
+  const arr = obj.seen;
+  let seenPeople = [];
+  for (let p of arr) {
+    seenPeople.push(new Person(p.id, p.name, p.images, p.nextInterval, p.dueDate));
+  }
+  return seenPeople;
+}

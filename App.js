@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
 import { AsyncStorage, FlatList, ScrollView, StyleSheet, Text, View, Button, Alert, Image } from 'react-native';
-import { Person, allPeople } from './person.js';
+import { Person, allPeople, deserializePeople } from './person.js';
 
-let all = allPeople;
-let newPeople = all.filter(p => p.nextInterval === null)
-let seenPeople = all.filter(p => p.nextInterval !== null)
+let newPeople = allPeople.filter(p => p.nextInterval === null)
+let seenPeople = allPeople.filter(p => p.nextInterval !== null)
 
 let appInstance = null;
 
@@ -31,22 +30,67 @@ class Card extends Component {
   }
 }
 
+async function save() {
+  // Persist
+  let dto = {seen:seenPeople, unused:null};
+  let serialized = JSON.stringify(dto);
+  console.log('Saving: ' + serialized);
+
+  try {
+    await AsyncStorage.setItem('@FT:saveState', serialized);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function load() {
+  try {
+    const json = await AsyncStorage.getItem('@FT:saveState');
+    if (json !== null){
+      // We have data!!
+      console.log('Loading: ' + json );
+      seenPeople = deserializePeople(json);
+      newPeople = allPeople.filter(p => {
+        for (const s of seenPeople) {
+          if (p.id === s.id) return false; //
+        }
+        return true;
+      });
+      console.log('newPeople: ' + newPeople);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+//AsyncStorage.clear(); 
+
 export default class App extends Component {
   constructor(props) {
     super(props);
     first = newPeople[0];
     this.state = {id: first.id, name: first.name, images: first.images};
     appInstance = this;
+
+    load().then(() => {
+      first = newPeople[0];
+      if (first) {
+        this.setState({id: first.id, name: first.name, images: first.images});
+      } else {
+        this.setState({id: null});
+      }
+    });
   }
 
   next() {
     let removed = newPeople.splice(0, 1);
     seenPeople.splice(seenPeople.length, 0, removed[0]);
+
+    save();
+
     nextPerson = newPeople[0];
     if (nextPerson) {
-      this.setState(previousState => {
-        return {id: nextPerson.id, name: nextPerson.name, images: nextPerson.images};
-      });
+      this.setState({id: nextPerson.id, name: nextPerson.name, images: nextPerson.images});
     } else {
       this.setState({id: null});
     }
