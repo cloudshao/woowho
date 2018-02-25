@@ -6,7 +6,7 @@ export default class Person {
     this.name = name;
     this.id = id;
     this.images = images;
-    this.nextInterval = nextInterval === undefined ? null : nextInterval;
+    this.nextInterval = nextInterval === undefined ? 0 : nextInterval;
     this.dueDate = dueDate === undefined ? Date.now() : dueDate;
   }
 }

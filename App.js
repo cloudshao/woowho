@@ -18,10 +18,11 @@ class Card extends Component {
   render() {
 
     console.log('this.props: ' + JSON.stringify(this.props));
+    const imageIdx = this.props.nextInterval % this.props.images.length;
 
     return (
       <View style={styles.container}>
-        <Image source={{uri: S3_URL + '/' + this.props.images[0]}}
+        <Image source={{uri: S3_URL + '/' + this.props.images[imageIdx]}}
                style={styles.portrait} />
         <Text>ID: {this.props.id}</Text>
         <Text>Name: {this.props.name}</Text>
@@ -131,9 +132,11 @@ export default class App extends Component {
   next(answer) {
     // TODO evaluate answer properly
     if (answer) { // correct
-      this.state.cur.dueDate = Date.now() + 10000;
+      this.state.cur.nextInterval++;
+      this.state.cur.dueDate = Date.now() + 10000; // TODO increase spacing
     } else {
-      this.state.cur.dueDate = Date.now();
+      this.state.cur.nextInterval = 0;
+      this.state.cur.dueDate = Date.now() + 10000;
     }
     seenPeople[this.state.cur.id] = this.state.cur;
 
