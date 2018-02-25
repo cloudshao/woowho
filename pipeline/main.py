@@ -3,6 +3,7 @@ import facecropper
 import json
 
 files = os.listdir("./res")
+files.sort();
 
 files = [f for f in files if f.endswith(('.jpg', '.png', '.gif'))]
 print(files)
