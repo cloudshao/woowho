@@ -65,8 +65,8 @@ def crop_image_to_face(filename, output_dir):
     mask = mask.resize(pil_image.size, Image.ANTIALIAS)
     pil_image.putalpha(mask)
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists(output_dir + "/faces"):
+        os.makedirs(output_dir + "/faces")
 
     basename = os.path.basename(filename)
     savename = "faces/" + basename.split(".")[0] + ".png"

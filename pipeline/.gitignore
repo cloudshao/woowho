@@ -2,3 +2,4 @@ venv*
 *.swp
 .Python
 *.pyc
+output
