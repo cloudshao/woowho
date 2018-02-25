@@ -30,18 +30,8 @@ export async function getAllPeople() {
   ).catch((error) => { console.error(error); });
 }
 
-/*
- [
-  new Person("patrickstewart", "Patrick Stewart", ["faces/patrickstewart1.png"]),
-  new Person("britneyspears", "Britney Spears", ["faces/patrickstewart1.png"]),
-  new Person("hyori", "Hyori", ["faces/patrickstewart1.png",
-    "faces/patrickstewart1.png",
-    "faces/patrickstewart1.png"]),
-];
-*/
-
 export function deserializeFromS3(json) {
-  let people = [];
+  let people = {};
   for (let p of json) {
     let person = new Person(p.id, p.name, p.images)
     if (p.nextInterval !== undefined) {
@@ -50,24 +40,23 @@ export function deserializeFromS3(json) {
     if (p.dueDate!== undefined) {
       person.dueDate = p.dueDate;
     }
-    people.push(person);
+    people[p.id] = person;
   }
   return people;
 }
 
-export function deserializePeople(json) {
-  const obj = JSON.parse(json);
-  const arr = obj.seen;
-  let seenPeople = [];
-  for (let p of arr) {
-    let person = new Person(p.id, p.name, p.images)
-    if (p.nextInterval !== undefined) {
-      person.nextInterval = p.nextInterval;
-    }
-    if (p.dueDate!== undefined) {
-      person.dueDate = p.dueDate;
-    }
-    seenPeople.push(person);
-  }
-  return seenPeople;
+export function summarizePeople(seen) {
+  return Object.keys(seen).reduce((acc, k) => {
+    acc[k] = {id: seen[k].id,
+              dueDate: seen[k].dueDate,
+              nextInterval: seen[k].nextInterval, };
+    return acc;
+  }, {});
+}
+
+export function desummarizePeople(seen, all) {
+  return Object.keys(seen).reduce((acc, k) => {
+    acc[k] = all[k];
+    return acc;
+  }, {});
 }
