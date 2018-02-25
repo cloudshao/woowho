@@ -1,9 +1,17 @@
 import React, {Component} from 'react';
 import { AsyncStorage, FlatList, ScrollView, StyleSheet, Text, View, Button, Alert, Image } from 'react-native';
-import { Person, allPeople, deserializePeople } from './person.js';
+import { Person, getAllPeople, deserializePeople } from './person.js';
 
+export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
+
+/*
+let allPeople = getAllPeople();
 let newPeople = allPeople.filter(p => p.nextInterval === null)
 let seenPeople = allPeople.filter(p => p.nextInterval !== null)
+*/
+let allPeople = [];
+let newPeople = [];
+let seenPeople = [];
 
 let appInstance = null;
 
@@ -14,11 +22,17 @@ class Card extends Component {
 
   render() {
 
+    console.log('this.props: ' + JSON.stringify(this.props));
+
     return (
       <View style={styles.container}>
-        <Text>My Id: {this.props.id}</Text>
-        <Text>Hello {this.props.name}</Text>
-        <Text>My images: {this.props.images}</Text>
+        <Image source={{uri: S3_URL + '/' + this.props.images[0]}}
+               style={styles.portrait} />
+        <Text>ID: {this.props.id}</Text>
+        <Text>Name: {this.props.name}</Text>
+        <Text>Images: {this.props.images.length} {this.props.images}</Text>
+        <Text>Due date: {this.props.dueDate}</Text>
+        <Text>Next interval: {this.props.nextInterval}</Text>
         <Button
           onPress={() => {appInstance.next();}}
           title="Seen" />
@@ -47,17 +61,19 @@ async function load() {
   try {
     const json = await AsyncStorage.getItem('@FT:saveState');
     if (json !== null){
-      // We have data!!
       console.log('Loading: ' + json );
       seenPeople = deserializePeople(json);
-      newPeople = allPeople.filter(p => {
-        for (const s of seenPeople) {
-          if (p.id === s.id) return false; //
-        }
-        return true;
-      });
-      console.log('newPeople: ' + newPeople);
     }
+
+    allPeople = await getAllPeople();
+    console.log('allPeople: ' + allPeople);
+    newPeople = allPeople.filter(p => {
+      for (const s of seenPeople) {
+        if (p.id === s.id) return false;
+      }
+      return true;
+    });
+    console.log('newPeople: ' + newPeople);
   } catch (error) {
     console.error(error);
   }
@@ -68,18 +84,23 @@ async function load() {
 export default class App extends Component {
   constructor(props) {
     super(props);
-    first = newPeople[0];
-    this.state = {id: first.id, name: first.name, images: first.images};
+    //first = newPeople[0];
+    this.state = {id: 'placeholder', name: 'Placeholder', images: [], dueDate: null, nextInterval: null};
     appInstance = this;
 
     load().then(() => {
-      first = newPeople[0];
-      if (first) {
-        this.setState({id: first.id, name: first.name, images: first.images});
-      } else {
-        this.setState({id: null});
-      }
+      this.showNextCard();
     });
+  }
+
+  showNextCard() {
+    first = newPeople[0];
+    if (first) {
+      console.log('Showing: ' + JSON.stringify(first));
+      this.setState({id: first.id, name: first.name, images: first.images, dueDate: first.dueDate, nextInterval: first.nextInterval});
+    } else {
+      this.setState({id: null});
+    }
   }
 
   next() {
@@ -87,25 +108,18 @@ export default class App extends Component {
     seenPeople.splice(seenPeople.length, 0, removed[0]);
 
     save();
-
-    nextPerson = newPeople[0];
-    if (nextPerson) {
-      this.setState({id: nextPerson.id, name: nextPerson.name, images: nextPerson.images});
-    } else {
-      this.setState({id: null});
-    }
+    showNextCard();
   }
 
   render() {
     if (this.state.id !== null) {
-      let id = this.state.id;
-      let name = this.state.name;
-      let images = this.state.images;
       return (
         <View style={styles.container}>
-          <Card id={id}
-                name={name}
-                images={images}/>
+          <Card id={this.state.id}
+                name={this.state.name}
+                images={this.state.images}
+                dueDate={this.state.dueDate}
+                nextInterval={this.state.nextInterval}/>
         </View>
       );
     } else {
@@ -126,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  image: {
+  portrait: {
     width: 200,
     height: 200,
   },
