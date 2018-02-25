@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { AsyncStorage, FlatList, ScrollView, StyleSheet, Text, View, Button, Alert, Image } from 'react-native';
-import { Person, getAllPeople, desummarizePeople, summarizePeople} from './person.js';
+import { AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
+import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
@@ -27,12 +27,13 @@ class Card extends Component {
         <Text>Name: {this.props.name}</Text>
         <Text>Images: {this.props.images.length} {this.props.images}</Text>
         <Text>Due date: {this.props.dueDate}</Text>
+        <Text>Current date: {Date.now()}</Text>
         <Text>Next interval: {this.props.nextInterval}</Text>
         <Button
-          onPress={() => {appInstance.next();}}
+          onPress={() => {appInstance.next(true);}}
           title="Seen" />
         <Button
-          onPress={() => {Alert.alert('You tapped');}}
+          onPress={() => {appInstance.next(false);}}
           title="Unseen" />
       </View>
     );
@@ -44,6 +45,7 @@ async function save() {
   let dto = summarizePeople(seenPeople);
   let serialized = JSON.stringify(dto);
   console.log('Saving: ' + serialized);
+  console.log('Current time: ' + Date.now());
 
   try {
     await AsyncStorage.setItem('@FT:saveState', serialized);
@@ -82,9 +84,11 @@ async function load() {
 //AsyncStorage.clear(); 
 
 export default class App extends Component {
+
+  state = {cur: {id: 'placeholder', name: 'Placeholder', images: [], dueDate: null, nextInterval: null}};
+
   constructor(props) {
     super(props);
-    this.state = {id: 'placeholder', name: 'Placeholder', images: [], dueDate: null, nextInterval: null};
     appInstance = this;
 
     load().then(() => {
@@ -94,36 +98,58 @@ export default class App extends Component {
 
   showCard() {
     let firstKey = null;
+
+    // Draw from new list
     for (let k in newPeople) { firstKey = k; break; }
-    const first = newPeople[firstKey];
+    let first = newPeople[firstKey];
     if (first) {
+      delete newPeople[firstKey];
       console.log('Showing: ' + JSON.stringify(first));
-      this.setState({id: first.id, name: first.name, images: first.images, dueDate: first.dueDate, nextInterval: first.nextInterval});
-    } else {
-      this.setState({id: null});
+      this.setState({cur:first});
+      return;
     }
+
+    // Draw from seen list
+    for (let k in seenPeople) {
+      if (seenPeople[k].dueDate < Date.now())
+      {
+        firstKey = k; break;
+      }
+    }
+    first = seenPeople[firstKey];
+    if (first) {
+      // TODO duplicate code
+      delete seenPeople[firstKey];
+      console.log('Showing: ' + JSON.stringify(first));
+      this.setState({cur:first});
+      return;
+    }
+
+    this.setState({cur:new Person(null, null, null)});
   }
 
-  next() {
-    console.assert(this.state.id in newPeople);
-    const removed = newPeople[this.state.id];
-    delete newPeople[this.state.id];
-    console.assert(!(this.state.id in seenPeople));
-    seenPeople[this.state.id] = removed;
+  next(answer) {
+    // TODO evaluate answer properly
+    if (answer) { // correct
+      this.state.cur.dueDate = Date.now() + 10000;
+    } else {
+      this.state.cur.dueDate = Date.now();
+    }
+    seenPeople[this.state.cur.id] = this.state.cur;
 
     save();
     this.showCard();
   }
 
   render() {
-    if (this.state.id !== null) {
+    if (this.state.cur.id !== null) {
       return (
         <View style={styles.container}>
-          <Card id={this.state.id}
-                name={this.state.name}
-                images={this.state.images}
-                dueDate={this.state.dueDate}
-                nextInterval={this.state.nextInterval}/>
+          <Card id={this.state.cur.id}
+                name={this.state.cur.name}
+                images={this.state.cur.images}
+                dueDate={this.state.cur.dueDate}
+                nextInterval={this.state.cur.nextInterval}/>
         </View>
       );
     } else {

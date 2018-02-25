@@ -33,7 +33,7 @@ export async function getAllPeople() {
 export function deserializeFromS3(json) {
   let people = {};
   for (let p of json) {
-    let person = new Person(p.id, p.name, p.images)
+    let person = new Person(p.id, p.name, p.images);
     if (p.nextInterval !== undefined) {
       person.nextInterval = p.nextInterval;
     }
@@ -57,6 +57,8 @@ export function summarizePeople(seen) {
 export function desummarizePeople(seen, all) {
   return Object.keys(seen).reduce((acc, k) => {
     acc[k] = all[k];
+    acc[k].dueDate = seen[k].dueDate;
+    acc[k].nextInterval = seen[k].nextInterval;
     return acc;
   }, {});
 }
