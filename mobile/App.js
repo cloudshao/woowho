@@ -8,7 +8,15 @@ export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetra
 
 let allPeople = {};
 let newPeople = {};
-let seenPeople = {};
+let seenPeople = new Map();
+
+function shuffle(array) {
+  let shuffled = array
+    .map((a) => ({sort: Math.random(), value: a}))
+    .sort((a, b) => a.sort - b.sort)
+    .map((a) => a.value);
+  return shuffled;
+}
 
 async function save() {
   console.log('seenPeople: ' + JSON.stringify(seenPeople));
@@ -36,10 +44,10 @@ async function load() {
       console.log('Loading: ' + json );
       const summarized = JSON.parse(json);
       seenPeople = desummarizePeople(summarized, allPeople);
-      console.log('seenPeople: ' + JSON.stringify(seenPeople));
+      console.log('loaded seenPeople: ' + seenPeople);
     }
 
-    const newKeys = Object.keys(allPeople).filter(k => !(k in seenPeople));
+    const newKeys = Object.keys(allPeople).filter(k => !seenPeople.has(k));
     console.log('newKeys: ' + JSON.stringify(newKeys));
     newPeople = newKeys.reduce((acc, k) => {
       acc[k] = allPeople[k];
@@ -84,16 +92,19 @@ export default class App extends Component
     }
 
     // Draw from seen list
-    for (let k in seenPeople) {
-      if (seenPeople[k].dueDate < Date.now())
+    let seenKeys = [...seenPeople.keys()];
+    console.log(seenKeys);
+    seenKeys = shuffle(seenKeys);
+    console.log(seenKeys);
+    seenKeys.forEach((k) => {
+      console.log(k);
+      if (seenPeople.get(k).dueDate < Date.now())
       {
-        firstKey = k; break;
+        first = seenPeople.get(k);
       }
-    }
-    first = seenPeople[firstKey];
+    });
     if (first) {
-      // TODO duplicate code
-      delete seenPeople[firstKey];
+      seenPeople.delete(first.id);
       console.log('Showing: ' + JSON.stringify(first));
       this.setState({side:'front', cur:first});
       return;
@@ -110,7 +121,7 @@ export default class App extends Component
       this.state.cur.nextInterval = 0;
       this.state.cur.dueDate = Date.now();
     }
-    seenPeople[this.state.cur.id] = this.state.cur;
+    seenPeople.set(this.state.cur.id, this.state.cur);
 
     save();
     this.showCard();
@@ -149,6 +160,7 @@ export default class App extends Component
       return (
         <View style={styles.container}>
           <Text>No more cards for today!</Text>
+          <Text>Current time: {Date.now()}</Text>
         </View>
       );
     }

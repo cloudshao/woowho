@@ -46,19 +46,22 @@ export function deserializeFromS3(json) {
 }
 
 export function summarizePeople(seen) {
-  return Object.keys(seen).reduce((acc, k) => {
-    acc[k] = {id: seen[k].id,
-              dueDate: seen[k].dueDate,
-              nextInterval: seen[k].nextInterval, };
+  return [...seen.keys()].reduce((acc, k) => {
+    let cur = seen.get(k);
+    acc[k] = {id: cur.id,
+              dueDate: cur.dueDate,
+              nextInterval: cur.nextInterval, };
     return acc;
   }, {});
 }
 
 export function desummarizePeople(seen, all) {
-  return Object.keys(seen).reduce((acc, k) => {
-    acc[k] = all[k];
-    acc[k].dueDate = seen[k].dueDate;
-    acc[k].nextInterval = seen[k].nextInterval;
+  let result = Object.keys(seen).reduce((acc, k) => {
+    let cur = all[k]; // XXX cshao: modifies entry in all list
+    cur.dueDate = seen[k].dueDate;
+    cur.nextInterval = seen[k].nextInterval;
+    acc.set(k, cur);
     return acc;
-  }, {});
+  }, new Map());
+  return result;
 }
