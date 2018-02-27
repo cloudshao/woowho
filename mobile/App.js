@@ -1,45 +1,14 @@
 import React, {Component} from 'react';
 import { AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
+import Card from './card'
+import AnswerCard from './answercard'
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
 let allPeople = {};
 let newPeople = {};
 let seenPeople = {};
-
-let appInstance = null;
-
-class Card extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-
-    console.log('this.props: ' + JSON.stringify(this.props));
-    const imageIdx = this.props.nextInterval % this.props.images.length;
-
-    return (
-      <View style={styles.container}>
-        <Image source={{uri: S3_URL + '/' + this.props.images[imageIdx]}}
-               style={styles.portrait} />
-        <Text>ID: {this.props.id}</Text>
-        <Text>Name: {this.props.name}</Text>
-        <Text>Images: {this.props.images.length} {this.props.images}</Text>
-        <Text>Due date: {this.props.dueDate}</Text>
-        <Text>Current date: {Date.now()}</Text>
-        <Text>Next interval: {this.props.nextInterval}</Text>
-        <Button
-          onPress={() => {appInstance.next(true);}}
-          title="Seen" />
-        <Button
-          onPress={() => {appInstance.next(false);}}
-          title="Unseen" />
-      </View>
-    );
-  }
-}
 
 async function save() {
   console.log('seenPeople: ' + JSON.stringify(seenPeople));
@@ -84,13 +53,17 @@ async function load() {
 
 //AsyncStorage.clear(); 
 
-export default class App extends Component {
-
-  state = {cur: {id: 'placeholder', name: 'Placeholder', images: [], dueDate: null, nextInterval: null}};
+export default class App extends Component
+{
+  state = {side: 'front',
+           cur: {id: 'placeholder',
+                 name: 'Placeholder',
+                 images: [],
+                 dueDate: null,
+                 nextInterval: null}};
 
   constructor(props) {
     super(props);
-    appInstance = this;
 
     load().then(() => {
       this.showCard();
@@ -106,7 +79,7 @@ export default class App extends Component {
     if (first) {
       delete newPeople[firstKey];
       console.log('Showing: ' + JSON.stringify(first));
-      this.setState({cur:first});
+      this.setState({side:'front', cur:first});
       return;
     }
 
@@ -122,7 +95,7 @@ export default class App extends Component {
       // TODO duplicate code
       delete seenPeople[firstKey];
       console.log('Showing: ' + JSON.stringify(first));
-      this.setState({cur:first});
+      this.setState({side:'front', cur:first});
       return;
     }
 
@@ -130,13 +103,12 @@ export default class App extends Component {
   }
 
   next(answer) {
-    // TODO evaluate answer properly
     if (answer) { // correct
       this.state.cur.nextInterval++;
       this.state.cur.dueDate = Date.now() + 10000; // TODO increase spacing
     } else {
       this.state.cur.nextInterval = 0;
-      this.state.cur.dueDate = Date.now() + 10000;
+      this.state.cur.dueDate = Date.now();
     }
     seenPeople[this.state.cur.id] = this.state.cur;
 
@@ -144,17 +116,35 @@ export default class App extends Component {
     this.showCard();
   }
 
+  flipCard() {
+    this.setState({side: 'back'});
+  }
+
   render() {
     if (this.state.cur.id !== null) {
-      return (
-        <View style={styles.container}>
-          <Card id={this.state.cur.id}
-                name={this.state.cur.name}
-                images={this.state.cur.images}
-                dueDate={this.state.cur.dueDate}
-                nextInterval={this.state.cur.nextInterval}/>
-        </View>
-      );
+      if (this.state.side === 'front') {
+        return (
+          <View style={styles.container}>
+            <Card id={this.state.cur.id}
+                  name={this.state.cur.name}
+                  images={this.state.cur.images}
+                  dueDate={this.state.cur.dueDate}
+                  nextInterval={this.state.cur.nextInterval}
+                  controller={this} />
+          </View>
+        );
+      } else {
+        return (
+          <View style={styles.container}>
+            <AnswerCard id={this.state.cur.id}
+                  name={this.state.cur.name}
+                  images={this.state.cur.images}
+                  dueDate={this.state.cur.dueDate}
+                  nextInterval={this.state.cur.nextInterval}
+                  controller={this}/>
+          </View>
+        );
+      }
     } else {
       return (
         <View style={styles.container}>
@@ -172,9 +162,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-  },
-  portrait: {
-    width: 200,
-    height: 200,
   },
 });
