@@ -4,6 +4,7 @@ import Person, { getAllPeople, desummarizePeople, summarizePeople} from './perso
 import Card from './card'
 import AnswerCard from './answercard'
 import MemorizeCard from './memorizecard'
+import HistoryService from './historyservice'
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
@@ -78,49 +79,61 @@ export default class App extends Component
     });
   }
 
-  showCard() {
+  async showCard() {
     console.log('showCard');
-    let firstKey = null;
+
+    const history = await HistoryService.get();
 
     // Draw from new list
-    for (let k in newPeople) { firstKey = k; break; }
-    let first = newPeople[firstKey];
-    if (first) {
-      delete newPeople[firstKey];
-      console.log('Showing: ' + JSON.stringify(first));
-      this.setState({side:'front', cur:first});
-      return;
+    if (!history.reachedMaxNewToday() && !history.reachedMaxToday()) {
+      let firstKey = null;
+      for (let k in newPeople) { firstKey = k; break; }
+      let first = newPeople[firstKey];
+      if (first) {
+        delete newPeople[firstKey];
+        console.log('Showing: ' + JSON.stringify(first));
+        this.setState({side:'front', cur:first});
+        return;
+      }
     }
 
     // Draw from seen list
+    // TODO perf? We shouldn't need to shuffle to draw randomly
+    let closestDueDate = new Date(3000, 1);
     let seenKeys = [...seenPeople.keys()];
     seenKeys = shuffle(seenKeys);
-    let closestDueDate = new Date(3000, 1);
+    let firstSeen = null;
     seenKeys.forEach((k) => {
       const p = seenPeople.get(k)
       console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
       if (p.dueDate < new Date())
       {
-        first = p;
+        firstSeen = p;
       } else {
         if (p.dueDate < closestDueDate) {
           closestDueDate = p.dueDate;
         }
       }
     });
-    if (first) {
-      seenPeople.delete(first.id);
-      console.log('Showing: ' + JSON.stringify(first));
-      this.setState({side:'front', cur:first});
+    if (firstSeen) {
+      seenPeople.delete(firstSeen.id);
+      console.log('Showing: ' + JSON.stringify(firstSeen));
+      this.setState({side:'front', cur:firstSeen});
       return;
     }
 
-    // TODO take new cards into account (next due is 3 days, but have new)
     console.log('showCard - closestDueDate: ' + closestDueDate.toLocaleString());
+    if (newPeople.length > 0) {
+      const now = new Date();
+      closestDueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 4); // 4 am tomorrow
+    }
+    console.log('showCard - closestDueDate counting new: ' + closestDueDate.toLocaleString());
     this.setState({nextCardDueDate:closestDueDate, cur:null})
   }
 
-  next(answer) { // TODO rename this and showCard
+  async next(answer) { // TODO rename this and showCard
+    const wasNew = this.state.cur.nextInterval === 0;
+
     if (!answer) { // incorrect
       this.state.cur.nextInterval = 0;
     }
@@ -141,6 +154,9 @@ export default class App extends Component
     seenPeople.set(this.state.cur.id, this.state.cur);
 
     save();
+    // TODO handle potential errors here
+    const history = await HistoryService.get();
+    await wasNew ? history.addNewReview() : history.addReview();
     this.showCard();
   }
 

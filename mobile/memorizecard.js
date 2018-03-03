@@ -11,6 +11,7 @@ export default class MemorizeCard extends Component {
 
     const imageIdx = this.props.nextInterval % this.props.images.length;
 
+    // TODO loading icon for image
     return (
       <View style={styles.container}>
         <Text>MEMORIZE!</Text>

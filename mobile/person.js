@@ -57,6 +57,10 @@ export function summarizePeople(seen) {
 
 export function desummarizePeople(seen, all) {
   let result = Object.keys(seen).reduce((acc, k) => {
+    if (!(k in all)) {
+      return acc;
+    }
+
     let cur = all[k]; // XXX cshao: modifies entry in all list
     cur.dueDate = new Date(seen[k].dueDate);
     cur.nextInterval = seen[k].nextInterval;
