@@ -4,6 +4,14 @@ import os
 
 def crop_image_to_face(filename, output_dir):
 
+    basename = os.path.basename(filename)
+    savename = "faces/" + basename.split(".")[0] + ".png"
+
+    # Exit early if the file already exists
+    savepath = output_dir + "/" + savename
+    if (os.path.exists(savepath)):
+        return savename
+
     # Load the jpg file into a numpy array
     image = face_recognition.load_image_file(filename)
 
@@ -68,12 +76,6 @@ def crop_image_to_face(filename, output_dir):
     if not os.path.exists(output_dir + "/faces"):
         os.makedirs(output_dir + "/faces")
 
-    basename = os.path.basename(filename)
-    savename = "faces/" + basename.split(".")[0] + ".png"
-    pil_image.save(output_dir + "/" + savename)
+    pil_image.save(savepath)
 
     return savename
-
-    #for facial_feature in facial_features:
-    #    d.line(face_landmarks[facial_feature], width=5)
-    #pil_image.show()

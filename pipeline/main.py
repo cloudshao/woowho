@@ -2,23 +2,27 @@ import os
 import facecropper
 import json
 
-files = os.listdir("./res")
-files.sort();
+img_suffixes = ('.jpg', '.jpeg', '.gif', '.png')
 
-files = [f for f in files if f.endswith(('.jpg', '.png', '.gif'))]
-print(files)
+dirs = [f for f in os.listdir("./res") if os.path.isdir("./res/" + f)]
+print(dirs)
 
-people = [
-    {'id': 'patrickstewart', 'name': 'Patrick Stewart'},
-    {'id': 'britneyspears', 'name': 'Britney Spears'},
-    {'id': 'leehyori', 'name': 'Lee Hyori'},
-    ]
+people = []
+for d in dirs:
 
-for p in people:
-    p['images'] = []
-    for f in [f for f in files if f.startswith(p['id'])]:
-        saved = facecropper.crop_image_to_face("res/" + f, "output")
+    # Read meta file from dir
+    meta = json.load(open("./res/" + d + "/meta.json"))
+    p = {'id': d, 'displayname': meta['firstname'], 'images': []}
+    people.append(p)
+
+    files = os.listdir("./res/" + d)
+    files.sort()
+    for f in [f for f in files if f.endswith(img_suffixes)]:
+        saved = facecropper.crop_image_to_face("res/" + d + "/" + f, "output")
         p['images'].append(saved)
+        print saved
+
+    assert(len(p['images']) == 8)
 
 jsonString = json.dumps(people)
 jsonFile = open('output/profiles.json', 'w')
