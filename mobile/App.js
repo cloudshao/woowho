@@ -3,6 +3,7 @@ import { AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'r
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
 import Card from './card'
 import AnswerCard from './answercard'
+import MemorizeCard from './memorizecard'
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
@@ -12,7 +13,7 @@ let seenPeople = new Map();
 
 // Maps nextInterval -> next due time in milliseconds
 // First one is a special case handled in the code
-const dueIntervals = [NaN, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+const dueIntervals = [NaN, 1, 3, 8, 21, 49, 109, 245];
 
 function shuffle(array) {
   let shuffled = array
@@ -151,16 +152,19 @@ export default class App extends Component
     console.log("Render: " + JSON.stringify(this.state.cur));
     if (this.state.cur !== null) {
       if (this.state.side === 'front') {
-        return (
-          <View style={styles.container}>
-            <Card id={this.state.cur.id}
-                  name={this.state.cur.name}
-                  images={this.state.cur.images}
-                  dueDate={this.state.cur.dueDate.toLocaleString()}
-                  nextInterval={this.state.cur.nextInterval}
-                  controller={this} />
-          </View>
-        );
+        return this.state.cur.nextInterval === 0 ?
+        (<MemorizeCard id={this.state.cur.id}
+               name={this.state.cur.name}
+               images={this.state.cur.images}
+               dueDate={this.state.cur.dueDate.toLocaleString()}
+               nextInterval={this.state.cur.nextInterval}
+               controller={this} />) :
+        (<Card id={this.state.cur.id}
+               name={this.state.cur.name}
+               images={this.state.cur.images}
+               dueDate={this.state.cur.dueDate.toLocaleString()}
+               nextInterval={this.state.cur.nextInterval}
+               controller={this} />);
       } else {
         return (
           <View style={styles.container}>
