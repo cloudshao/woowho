@@ -17,8 +17,8 @@ export default class Card extends Component {
                style={styles.portrait} />
         <Text>ID: {this.props.id}</Text>
         <Text>Images: {this.props.images.length} {this.props.images}</Text>
-        <Text>Due date: {this.props.dueDate}</Text>
-        <Text>Current date: {Date.now()}</Text>
+        <Text>Due date: {this.props.dueDate.toLocaleString()}</Text>
+        <Text>Current date: {new Date().toLocaleString()}</Text>
         <Text>Next interval: {this.props.nextInterval}</Text>
         <Button
           onPress={() => {this.props.controller.flipCard(true);}}

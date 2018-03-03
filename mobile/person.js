@@ -7,7 +7,7 @@ export default class Person {
     this.id = id;
     this.images = images;
     this.nextInterval = nextInterval === undefined ? 0 : nextInterval;
-    this.dueDate = dueDate === undefined ? Date.now() : dueDate;
+    this.dueDate = dueDate === undefined ? new Date() : dueDate;
   }
 }
 
@@ -35,10 +35,10 @@ export function deserializeFromS3(json) {
   for (let p of json) {
     let person = new Person(p.id, p.name, p.images);
     if (p.nextInterval !== undefined) {
-      person.nextInterval = p.nextInterval;
+      throw 'UNEXPECTED';
     }
     if (p.dueDate!== undefined) {
-      person.dueDate = p.dueDate;
+      throw 'UNEXPECTED';
     }
     people[p.id] = person;
   }
@@ -58,7 +58,7 @@ export function summarizePeople(seen) {
 export function desummarizePeople(seen, all) {
   let result = Object.keys(seen).reduce((acc, k) => {
     let cur = all[k]; // XXX cshao: modifies entry in all list
-    cur.dueDate = seen[k].dueDate;
+    cur.dueDate = new Date(seen[k].dueDate);
     cur.nextInterval = seen[k].nextInterval;
     acc.set(k, cur);
     return acc;

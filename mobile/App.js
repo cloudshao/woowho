@@ -10,6 +10,10 @@ let allPeople = {};
 let newPeople = {};
 let seenPeople = new Map();
 
+// Maps nextInterval -> next due time in milliseconds
+// First one is a special case handled in the code
+const dueIntervals = [NaN, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+
 function shuffle(array) {
   let shuffled = array
     .map((a) => ({sort: Math.random(), value: a}))
@@ -23,7 +27,7 @@ async function save() {
   let dto = summarizePeople(seenPeople);
   let serialized = JSON.stringify(dto);
   console.log('Saving: ' + serialized);
-  console.log('Current time: ' + Date.now());
+  console.log('Current time: ' + new Date());
 
   try {
     await AsyncStorage.setItem('@FT:saveState', serialized);
@@ -63,12 +67,7 @@ async function load() {
 
 export default class App extends Component
 {
-  state = {side: 'front',
-           cur: {id: 'placeholder',
-                 name: 'Placeholder',
-                 images: [],
-                 dueDate: null,
-                 nextInterval: null}};
+  state = {side: 'front', cur: null, nextCardDueDate:new Date(3000, 1)};
 
   constructor(props) {
     super(props);
@@ -79,6 +78,7 @@ export default class App extends Component
   }
 
   showCard() {
+    console.log('showCard');
     let firstKey = null;
 
     // Draw from new list
@@ -93,14 +93,18 @@ export default class App extends Component
 
     // Draw from seen list
     let seenKeys = [...seenPeople.keys()];
-    console.log(seenKeys);
     seenKeys = shuffle(seenKeys);
-    console.log(seenKeys);
+    let closestDueDate = new Date(3000, 1);
     seenKeys.forEach((k) => {
-      console.log(k);
-      if (seenPeople.get(k).dueDate < Date.now())
+      const p = seenPeople.get(k)
+      console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
+      if (p.dueDate < new Date())
       {
-        first = seenPeople.get(k);
+        first = p;
+      } else {
+        if (p.dueDate < closestDueDate) {
+          closestDueDate = p.dueDate;
+        }
       }
     });
     if (first) {
@@ -110,17 +114,29 @@ export default class App extends Component
       return;
     }
 
-    this.setState({cur:new Person(null, null, null)});
+    // TODO take new cards into account (next due is 3 days, but have new)
+    console.log('showCard - closestDueDate: ' + closestDueDate.toLocaleString());
+    this.setState({nextCardDueDate:closestDueDate, cur:null})
   }
 
-  next(answer) {
-    if (answer) { // correct
-      this.state.cur.nextInterval++;
-      this.state.cur.dueDate = Date.now() + 10000; // TODO increase spacing
-    } else {
+  next(answer) { // TODO rename this and showCard
+    if (!answer) { // incorrect
       this.state.cur.nextInterval = 0;
-      this.state.cur.dueDate = Date.now();
     }
+
+    // Figure out when this card is due next
+    const now = new Date();
+    if (this.state.cur.nextInterval === 0) { // Special case for first view
+      this.state.cur.nextInterval++;
+      this.state.cur.dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()+10); // 10 minutes
+    } else {
+      const dueIntervalIndex = Math.min(this.state.cur.nextInterval, dueIntervals.length);
+      const daysUntilDue = dueIntervals[dueIntervalIndex];
+      this.state.cur.nextInterval++;
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()+daysUntilDue, 4); // 4 am on that day
+      this.state.cur.dueDate = dueDate;
+    }
+
     seenPeople.set(this.state.cur.id, this.state.cur);
 
     save();
@@ -132,14 +148,15 @@ export default class App extends Component
   }
 
   render() {
-    if (this.state.cur.id !== null) {
+    console.log("Render: " + JSON.stringify(this.state.cur));
+    if (this.state.cur !== null) {
       if (this.state.side === 'front') {
         return (
           <View style={styles.container}>
             <Card id={this.state.cur.id}
                   name={this.state.cur.name}
                   images={this.state.cur.images}
-                  dueDate={this.state.cur.dueDate}
+                  dueDate={this.state.cur.dueDate.toLocaleString()}
                   nextInterval={this.state.cur.nextInterval}
                   controller={this} />
           </View>
@@ -150,7 +167,7 @@ export default class App extends Component
             <AnswerCard id={this.state.cur.id}
                   name={this.state.cur.name}
                   images={this.state.cur.images}
-                  dueDate={this.state.cur.dueDate}
+                  dueDate={this.state.cur.dueDate.toLocaleString()}
                   nextInterval={this.state.cur.nextInterval}
                   controller={this}/>
           </View>
@@ -160,7 +177,8 @@ export default class App extends Component
       return (
         <View style={styles.container}>
           <Text>No more cards for today!</Text>
-          <Text>Current time: {Date.now()}</Text>
+          <Text>Current time: {new Date().toLocaleString()}</Text>
+          <Text>Next card due: {this.state.nextCardDueDate.toLocaleString()}</Text>
         </View>
       );
     }
