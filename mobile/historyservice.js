@@ -55,7 +55,7 @@ class HistoryService {
     return this._history.introduced.length;
   }
 
-  reviewsPerDay() { return 10; }
+  reviewsPerDay() { return 20; }
 
   newPerDay() { return 3; }
 
