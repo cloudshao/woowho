@@ -2,8 +2,8 @@ import { S3_URL } from './App.js';
 //const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
 export default class Person {
-  constructor(id, name, images, nextInterval, dueDate) {
-    this.name = name;
+  constructor(id, displayname, images, nextInterval, dueDate) {
+    this.displayname = displayname;
     this.id = id;
     this.images = images;
     this.nextInterval = nextInterval === undefined ? 0 : nextInterval;
@@ -33,7 +33,7 @@ export async function getAllPeople() {
 export function deserializeFromS3(json) {
   let people = {};
   for (let p of json) {
-    let person = new Person(p.id, p.name, p.images);
+    let person = new Person(p.id, p.displayname, p.images);
     if (p.nextInterval !== undefined) {
       throw 'UNEXPECTED';
     }

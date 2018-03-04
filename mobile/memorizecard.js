@@ -18,6 +18,7 @@ export default class MemorizeCard extends Component {
         <Image source={{uri: S3_URL + '/' + this.props.images[imageIdx]}}
                style={styles.portrait} />
         <Text>ID: {this.props.id}</Text>
+        <Text>Name: {this.props.displayname}</Text>
         <Text>Images: {this.props.images.length} {this.props.images}</Text>
         <Text>Due date: {this.props.dueDate.toLocaleString()}</Text>
         <Text>Current date: {new Date().toLocaleString()}</Text>

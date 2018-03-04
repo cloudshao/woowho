@@ -184,13 +184,13 @@ export default class App extends Component
       if (this.state.side === 'front') {
         return this.state.cur.nextInterval === 0 ?
         (<MemorizeCard id={this.state.cur.id}
-               name={this.state.cur.name}
+               displayname={this.state.cur.displayname}
                images={this.state.cur.images}
                dueDate={this.state.cur.dueDate.toLocaleString()}
                nextInterval={this.state.cur.nextInterval}
                controller={this} />) :
         (<Card id={this.state.cur.id}
-               name={this.state.cur.name}
+               displayname={this.state.cur.displayname}
                images={this.state.cur.images}
                dueDate={this.state.cur.dueDate.toLocaleString()}
                nextInterval={this.state.cur.nextInterval}
@@ -199,7 +199,7 @@ export default class App extends Component
         return (
           <View style={styles.container}>
             <AnswerCard id={this.state.cur.id}
-                  name={this.state.cur.name}
+                  displayname={this.state.cur.displayname}
                   images={this.state.cur.images}
                   dueDate={this.state.cur.dueDate.toLocaleString()}
                   nextInterval={this.state.cur.nextInterval}
