@@ -15,6 +15,7 @@ export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetra
 let allPeople = {};
 let newPeople = {};
 let seenPeople = new Map();
+let loading = true;
 
 // Maps nextInterval -> next due time in milliseconds
 // First one is a special case handled in the code
@@ -43,6 +44,7 @@ async function save() {
 }
 
 async function load() {
+  loading = true;
   try {
     // Load full list from S3
     allPeople = await getAllPeople();
@@ -66,6 +68,8 @@ async function load() {
     console.log('newPeople: ' + JSON.stringify(newPeople));
   } catch (error) {
     console.error(error);
+  } finally {
+    loading = false;
   }
 }
 
@@ -73,16 +77,32 @@ async function load() {
 
 export default class App extends Component
 {
-  loaded = false;
   state = {side: 'front', cur: null, nextCardDueDate:new Date(3000, 1)};
 
   constructor(props) {
     super(props);
 
     load().then(() => {
-      this.loaded = true;
       this.showCard();
     });
+
+    this._handleAppStateChange = this._handleAppStateChange.bind(this);
+  }
+
+  componentDidMount() {
+    AppState.addEventListener('change', this._handleAppStateChange);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  async _handleAppStateChange(nextAppState) {
+    if (nextAppState === 'active') {
+      if (this.state.cur === null && !loading) {
+        this.showCard(); // Refresh to see if any new ones are due
+      }
+    }
   }
 
   async showCard() {
@@ -181,7 +201,7 @@ export default class App extends Component
   }
 
   _getContentsToRender() {
-    if (!this.loaded) {
+    if (loading) {
       return (
         <View>
           <ActivityIndicator size="large" color="#0000ff" />
