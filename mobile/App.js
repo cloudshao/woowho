@@ -2,6 +2,7 @@ if (!__DEV__) {
   console.log = () => {};
 }
 
+import moment from 'moment'
 import React, {Component} from 'react';
 import { ActivityIndicator, AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
@@ -215,7 +216,7 @@ export default class App extends Component
         <View style={styles.container}>
           <Text>No more cards for today!</Text>
           <Text>Current time: {new Date().toLocaleString()}</Text>
-          <Text>Next card due: {this.state.nextCardDueDate.toLocaleString()}</Text>
+          <Text>Next card due: {moment(this.state.nextCardDueDate).fromNow()}</Text>
         </View>
       );
     }
@@ -264,6 +265,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#8cc136',
   },
 });
