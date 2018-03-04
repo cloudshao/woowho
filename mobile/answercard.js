@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import { Animated, Easing, StyleSheet, Text, View, TouchableHighlight, Image } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View, Image } from 'react-native';
+import Touchable from 'react-native-platform-touchable';
 import PortraitCard from './portraitcard';
 import Styles from './styles';
 import { S3_URL } from './App.js';
@@ -54,22 +55,24 @@ export default class AnswerCard extends Component {
           <PortraitCard source={imageSrc}>
             <Text style={Styles.name}>{this.props.displayname}</Text>
             <View style={styles.buttonContainer}>
-              <TouchableHighlight
+              <Touchable
+                background={Touchable.SelectableBackground}
                 onPress={() => {
                   this.slideAway(() => {this.props.controller.next(false);});
                 }}>
                 <View style={styles.leftButton}>
                   <Text style={Styles.buttonText}>&#x2717;</Text>
                 </View>
-              </TouchableHighlight>
-              <TouchableHighlight
+              </Touchable>
+              <Touchable
+                background={Touchable.SelectableBackground}
                 onPress={() => {
                   this.slideAway(() => {this.props.controller.next(true);});
                 }}>
                 <View style={styles.rightButton}>
                   <Text style={Styles.buttonText}>&#x2713;</Text>
                 </View>
-              </TouchableHighlight>
+              </Touchable>
             </View>
           </PortraitCard>
         </Animated.View>

@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import { Animated, Easing, StyleSheet, Text, View, TouchableHighlight, Image } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View, Image } from 'react-native';
+import Touchable from 'react-native-platform-touchable';
 import { S3_URL } from './App.js';
 import Styles from './styles';
 import PortraitCard from './portraitcard';
@@ -53,12 +54,13 @@ export default class Card extends Component {
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
             <Text style={styles.score}>&#11088; {this.props.nextInterval}</Text>
-            <TouchableHighlight
-              onPress={() => {this.spin(() => {this.props.controller.flipCard(true);})}}>
+            <Touchable
+              onPress={() => {this.spin(() => {this.props.controller.flipCard(true);})}}
+              background={Touchable.SelectableBackground}>
               <View style={styles.stretchButton}>
                 <Text style={Styles.buttonText}>&#10555;</Text>
               </View>
-            </TouchableHighlight>
+            </Touchable>
           </PortraitCard>
         </Animated.View>
       </View>
