@@ -215,8 +215,9 @@ export default class App extends Component
     if (this.state.cur === null) {
       return (
         <Text style={Styles.title}>
+          Woohoo!{"\n"}
           (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
-          Next card due{"\n"}
+          Next card{"\n"}
           {moment(this.state.nextCardDueDate).fromNow()}
         </Text>
       );

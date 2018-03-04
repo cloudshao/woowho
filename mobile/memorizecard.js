@@ -55,6 +55,7 @@ export default class MemorizeCard extends Component {
         <Text style={Styles.title}>Memorize</Text>
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
+            <Text style={Styles.name}>{this.props.displayname}</Text>
             <Touchable
               background={Touchable.SelectableBackground}
               onPress={() => {
