@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   card: {
     flex: -1,
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingTop: 100,
     borderRadius: 10,

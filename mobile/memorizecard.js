@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import { Animated, Easing, StyleSheet, Text, View, Button, Image } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View, TouchableHighlight, Image } from 'react-native';
 import PortraitCard from './portraitcard';
+import Styles from './styles';
 import { S3_URL } from './App.js';
 
 export default class MemorizeCard extends Component {
@@ -49,17 +50,33 @@ export default class MemorizeCard extends Component {
 
     // TODO loading icon for image
     return (
-      <Animated.View style={animStyle}>
-        <PortraitCard source={imageSrc}>
-          <Text>MEMORIZE!</Text>
-          <Button
-            onPress={() => {
-              this.slideAway(() => {this.props.controller.next(true);});
-            }}
-            title="Done" />
-        </PortraitCard>
-      </Animated.View>
+      <View>
+        <Text style={Styles.title}>Memorize</Text>
+        <Animated.View style={animStyle}>
+          <PortraitCard source={imageSrc}>
+            <TouchableHighlight
+              onPress={() => {
+                this.slideAway(() => {this.props.controller.next(true);});
+              }}>
+              <View style={styles.stretchButton}>
+                <Text style={Styles.buttonText}>&#x2713;</Text>
+              </View>
+            </TouchableHighlight>
+          </PortraitCard>
+        </Animated.View>
+      </View>
     );
   }
 }
 
+const styles = StyleSheet.create({
+  stretchButton: {
+    flex: -1,
+    justifyContent: 'center',
+    backgroundColor: '#10752b',
+    width: 300,
+    height: 100,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+});
