@@ -10,6 +10,7 @@ import Card from './card'
 import AnswerCard from './answercard'
 import MemorizeCard from './memorizecard'
 import HistoryService from './historyservice'
+import Styles from './styles'
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
@@ -213,24 +214,22 @@ export default class App extends Component
 
     if (this.state.cur === null) {
       return (
-        <View style={styles.container}>
-          <Text>No more cards for today!</Text>
-          <Text>Current time: {new Date().toLocaleString()}</Text>
-          <Text>Next card due: {moment(this.state.nextCardDueDate).fromNow()}</Text>
-        </View>
+        <Text style={Styles.title}>
+          (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
+          Next card due{"\n"}
+          {moment(this.state.nextCardDueDate).fromNow()}
+        </Text>
       );
     }
 
     if (this.state.side !== 'front') {
       return (
-        <View style={styles.container}>
           <AnswerCard id={this.state.cur.id}
                 displayname={this.state.cur.displayname}
                 images={this.state.cur.images}
                 dueDate={this.state.cur.dueDate.toLocaleString()}
                 nextInterval={this.state.cur.nextInterval}
                 controller={this}/>
-        </View>
       );
     }
 
