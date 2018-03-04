@@ -4,7 +4,7 @@ class HistoryService {
 
   constructor() {
     this._initialized = false;
-    this._history = {
+    this._history = { // List of stuff viewed today
       reviewed: [],
       introduced: [],
     }
@@ -14,7 +14,6 @@ class HistoryService {
     if (!this._initialized) {
       const json = await AsyncStorage.getItem('@FT:historyState');
       if (json !== null) {
-        console.log('HistoryService.get: ' + json);
         const history = JSON.parse(json);
         this._history.reviewed = history.reviewed
           .map(d => new Date(d))
@@ -22,8 +21,9 @@ class HistoryService {
         this._history.introduced = history.introduced
           .map(d => new Date(d))
           .filter(d => _isToday(d));
+        console.log('HistoryService.get: ' + JSON.stringify(this._history));
       } else {
-        console.log('HistoryService.get - Unable to load history');
+        console.log('HistoryService.get - No history to load');
       }
 
       this._initialized = true;
@@ -47,17 +47,20 @@ class HistoryService {
     await this._save();
   }
 
-  anyViewedToday() {
-    return this._history.reviewed.length > 0 ||
-           this._history.introduced.length > 0;
+  numReviewedToday() {
+    return this._history.reviewed.length;
   }
 
-  reachedMaxToday() {
-    return this._history.reviewed.length + this._history.introduced.length >= 10;
+  numNewToday() {
+    return this._history.introduced.length;
   }
+
+  reviewsPerDay() { return 10; }
+
+  newPerDay() { return 3; }
 
   reachedMaxNewToday() {
-    return this._history.introduced.length >= 3;
+    return this._history.introduced.length >= this.newPerDay();
   }
 }
 

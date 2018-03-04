@@ -1,3 +1,7 @@
+if (!__DEV__) {
+  console.log = () => {};
+}
+
 import React, {Component} from 'react';
 import { AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
@@ -84,8 +88,35 @@ export default class App extends Component
 
     const history = await HistoryService.get();
 
+    // TODO perf? We shouldn't need to shuffle to draw randomly
+    const now = new Date();
+    let closestDueDate = new Date(3000, 1);
+    let seenKeys = [...seenPeople.keys()];
+    seenKeys = shuffle(seenKeys);
+    let firstSeen = null;
+    let numDue = 0;
+    seenKeys.forEach((k) => {
+      const p = seenPeople.get(k)
+      console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
+
+      if (p.dueDate < new Date())
+      {
+        firstSeen = p;
+        numDue++;
+      }
+
+      if (p.dueDate < closestDueDate) {
+        closestDueDate = p.dueDate;
+      }
+    });
+
+    console.log("showCard Due: " + numDue);
+    console.log("showCard history.numReviewedToday: " + history.numReviewedToday());
+    console.log("showCard history.numNewToday: " + history.numNewToday());
+
     // Draw from new list
-    if (!history.reachedMaxNewToday() && !history.reachedMaxToday()) {
+    if (!history.reachedMaxNewToday() &&
+        numDue + history.numReviewedToday() < history.reviewsPerDay()) {
       let firstKey = null;
       for (let k in newPeople) { firstKey = k; break; }
       let first = newPeople[firstKey];
@@ -98,23 +129,6 @@ export default class App extends Component
     }
 
     // Draw from seen list
-    // TODO perf? We shouldn't need to shuffle to draw randomly
-    let closestDueDate = new Date(3000, 1);
-    let seenKeys = [...seenPeople.keys()];
-    seenKeys = shuffle(seenKeys);
-    let firstSeen = null;
-    seenKeys.forEach((k) => {
-      const p = seenPeople.get(k)
-      console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
-      if (p.dueDate < new Date())
-      {
-        firstSeen = p;
-      } else {
-        if (p.dueDate < closestDueDate) {
-          closestDueDate = p.dueDate;
-        }
-      }
-    });
     if (firstSeen) {
       seenPeople.delete(firstSeen.id);
       console.log('Showing: ' + JSON.stringify(firstSeen));
