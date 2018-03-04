@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import { Animated, Easing, StyleSheet, Text, View, Image } from 'react-native';
-import Touchable from 'react-native-platform-touchable';
+import { Animated, Easing, StyleSheet, TouchableOpacity, Text, View, Image } from 'react-native';
 import PortraitCard from './portraitcard';
 import Styles from './styles';
 import { S3_URL } from './App.js';
@@ -56,15 +55,14 @@ export default class MemorizeCard extends Component {
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
             <Text style={Styles.name}>{this.props.displayname}</Text>
-            <Touchable
-              background={Touchable.SelectableBackground}
+            <TouchableOpacity
               onPress={() => {
                 this.slideAway(() => {this.props.controller.next(true);});
               }}>
               <View style={styles.stretchButton}>
                 <Text style={Styles.buttonText}>&#x2713;</Text>
               </View>
-            </Touchable>
+            </TouchableOpacity>
           </PortraitCard>
         </Animated.View>
       </View>

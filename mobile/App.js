@@ -123,8 +123,7 @@ export default class App extends Component
       const p = seenPeople.get(k)
       console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
 
-      if (p.dueDate < new Date())
-      {
+      if (p.dueDate < new Date()) {
         firstSeen = p;
         numDue++;
       }
@@ -205,9 +204,8 @@ export default class App extends Component
   _getContentsToRender() {
     if (loading) {
       return (
-        <View>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text>Loading...</Text>
+        <View style={{transform: [{scale:2}]}}>
+          <ActivityIndicator size="small" color="white" />
         </View>
       );
     }
