@@ -5,10 +5,19 @@ import { S3_URL } from './App.js';
 export default class Card extends Component {
   state = {
     spinValue: new Animated.Value(0),
+    slideValue: new Animated.Value(450),
   }
 
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount(){
+    Animated.timing(this.state.slideValue, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+      }).start();
   }
 
   spin(callback) {
@@ -29,7 +38,8 @@ export default class Card extends Component {
     const imageIdx = this.props.nextInterval % this.props.images.length;
 
     let animStyle = {
-      transform: [{rotateY: this.spinInterp}]
+      transform: [{rotateY: this.spinInterp},
+                  {translateX: this.state.slideValue}]
     };
 
     return (
