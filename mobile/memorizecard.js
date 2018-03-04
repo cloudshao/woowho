@@ -17,7 +17,17 @@ export default class MemorizeCard extends Component {
         toValue: 0,
         duration: 200,
         easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
       }).start();
+  }
+
+  slideAway(callback){
+    Animated.timing(this.state.slideValue, {
+        toValue: -450,
+        duration: 200,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(callback);
   }
 
   componentDidMount() {
@@ -26,14 +36,6 @@ export default class MemorizeCard extends Component {
 
   componentDidUpdate() {
     this.slideIn();
-  }
-
-  slideAway(callback){
-    Animated.timing(this.state.slideValue, {
-        toValue: -450,
-        duration: 200,
-        easing: Easing.in(Easing.cubic),
-      }).start(callback);
   }
 
   render() {

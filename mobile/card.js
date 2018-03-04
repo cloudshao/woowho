@@ -17,6 +17,7 @@ export default class Card extends Component {
         toValue: 0,
         duration: 200,
         easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
       }).start();
   }
 
@@ -25,6 +26,7 @@ export default class Card extends Component {
         toValue: 100,
         duration: 300,
         easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
       }).start(callback);
   }
 
