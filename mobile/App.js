@@ -3,7 +3,7 @@ if (!__DEV__) {
 }
 
 import React, {Component} from 'react';
-import { AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
+import { ActivityIndicator, AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
 import Card from './card'
 import AnswerCard from './answercard'
@@ -73,12 +73,14 @@ async function load() {
 
 export default class App extends Component
 {
+  loaded = false;
   state = {side: 'front', cur: null, nextCardDueDate:new Date(3000, 1)};
 
   constructor(props) {
     super(props);
 
     load().then(() => {
+      this.loaded = true;
       this.showCard();
     });
   }
@@ -178,36 +180,17 @@ export default class App extends Component
     this.setState({side: 'back'});
   }
 
-  render() {
-    console.log("Render: " + JSON.stringify(this.state.cur));
-    if (this.state.cur !== null) {
-      if (this.state.side === 'front') {
-        return this.state.cur.nextInterval === 0 ?
-        (<MemorizeCard id={this.state.cur.id}
-               displayname={this.state.cur.displayname}
-               images={this.state.cur.images}
-               dueDate={this.state.cur.dueDate.toLocaleString()}
-               nextInterval={this.state.cur.nextInterval}
-               controller={this} />) :
-        (<Card id={this.state.cur.id}
-               displayname={this.state.cur.displayname}
-               images={this.state.cur.images}
-               dueDate={this.state.cur.dueDate.toLocaleString()}
-               nextInterval={this.state.cur.nextInterval}
-               controller={this} />);
-      } else {
-        return (
-          <View style={styles.container}>
-            <AnswerCard id={this.state.cur.id}
-                  displayname={this.state.cur.displayname}
-                  images={this.state.cur.images}
-                  dueDate={this.state.cur.dueDate.toLocaleString()}
-                  nextInterval={this.state.cur.nextInterval}
-                  controller={this}/>
-          </View>
-        );
-      }
-    } else {
+  _getContentsToRender() {
+    if (!this.loaded) {
+      return (
+        <View>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading...</Text>
+        </View>
+      );
+    }
+
+    if (this.state.cur === null) {
       return (
         <View style={styles.container}>
           <Text>No more cards for today!</Text>
@@ -216,6 +199,42 @@ export default class App extends Component
         </View>
       );
     }
+
+    if (this.state.side !== 'front') {
+      return (
+        <View style={styles.container}>
+          <AnswerCard id={this.state.cur.id}
+                displayname={this.state.cur.displayname}
+                images={this.state.cur.images}
+                dueDate={this.state.cur.dueDate.toLocaleString()}
+                nextInterval={this.state.cur.nextInterval}
+                controller={this}/>
+        </View>
+      );
+    }
+
+    return this.state.cur.nextInterval === 0 ?
+      (<MemorizeCard id={this.state.cur.id}
+           displayname={this.state.cur.displayname}
+           images={this.state.cur.images}
+           dueDate={this.state.cur.dueDate.toLocaleString()}
+           nextInterval={this.state.cur.nextInterval}
+           controller={this} />) :
+      (<Card id={this.state.cur.id}
+           displayname={this.state.cur.displayname}
+           images={this.state.cur.images}
+           dueDate={this.state.cur.dueDate.toLocaleString()}
+           nextInterval={this.state.cur.nextInterval}
+           controller={this} />);
+  }
+
+  render() {
+    console.log("Render: " + JSON.stringify(this.state.cur));
+    return (
+      <View style={styles.container}>
+        {this._getContentsToRender()}
+      </View>
+    );
   }
 }
 
