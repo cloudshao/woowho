@@ -79,7 +79,12 @@ async function load() {
 
 export default class App extends Component
 {
-  state = {side: 'front', cur: null, nextCardDueDate:new Date(3000, 1)};
+  state = {side: 'front',
+           cur: null,
+           nextCardDueDate:new Date(3000, 1),
+           score: 0,
+           numDue: 0,
+           numNew: 0};
 
   constructor(props) {
     super(props);
@@ -89,6 +94,7 @@ export default class App extends Component
     });
 
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
+    this._refreshDonePage = this._refreshDonePage.bind(this);
   }
 
   componentDidMount() {
@@ -119,6 +125,7 @@ export default class App extends Component
     seenKeys = shuffle(seenKeys);
     let firstSeen = null;
     let numDue = 0;
+    let score = 0;
     seenKeys.forEach((k) => {
       const p = seenPeople.get(k)
       console.log('showCard - seen person: ' + p.id + ' ' + p.dueDate.toLocaleString());
@@ -131,8 +138,14 @@ export default class App extends Component
       if (p.dueDate < closestDueDate) {
         closestDueDate = p.dueDate;
       }
+
+      if (p.nextInterval > 1) {
+        score += p.nextInterval-1;
+      }
     });
 
+    const numNew = Math.min(history.newPerDay() - history.numNewToday(), Object.keys(newPeople).length);
+    this.setState({numNew: numNew, numDue: numDue, score: score});
     console.log("showCard Due: " + numDue);
     console.log("showCard history.numReviewedToday: " + history.numReviewedToday());
     console.log("showCard history.numNewToday: " + history.numNewToday());
@@ -166,6 +179,14 @@ export default class App extends Component
     }
     console.log('showCard - closestDueDate counting new: ' + closestDueDate.toLocaleString());
     this.setState({nextCardDueDate:closestDueDate, cur:null})
+    setTimeout(this._refreshDonePage, 20000);
+  }
+
+  _refreshDonePage() {
+    console.log('_refreshDonePage');
+    if (this.state.cur == null) {
+      this.showCard();
+    }
   }
 
   async next(answer) { // TODO rename this and showCard
@@ -202,49 +223,81 @@ export default class App extends Component
   }
 
   _getContentsToRender() {
+
+    const score = this.state.score <= 0 ? null :
+      <Text style={styles.statusText}>&#11088; {this.state.score*100}</Text>;
+    const due = this.state.numDue <= 0 ? null :
+      <Text style={styles.statusText}>&#129300; {this.state.numDue}</Text>;
+    const newText = this.state.numNew <= 0 ? null :
+      <Text style={styles.statusText}>&#128566; {this.state.numNew}</Text>;
+    const statusBar = 
+      (<View style={styles.statusBar}>
+        {score}
+        {newText}
+        {due}
+      </View>);
+
     if (loading) {
       return (
-        <View style={{transform: [{scale:2}]}}>
-          <ActivityIndicator size="small" color="white" />
+        <View>
+          <ActivityIndicator size="large" color="black" />
         </View>
       );
     }
 
     if (this.state.cur === null) {
       return (
-        <Text style={Styles.title}>
-          Woohoo!{"\n"}
-          (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
-          Next card{"\n"}
-          {moment(this.state.nextCardDueDate).fromNow()}
-        </Text>
+        <View>
+          <Text style={Styles.title}>
+            Woohoo!{"\n"}
+            (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
+            Next card{"\n"}
+            {moment(this.state.nextCardDueDate).fromNow()}
+          </Text>
+          {statusBar}
+        </View>
       );
     }
 
     if (this.state.side !== 'front') {
       return (
+        <View>
           <AnswerCard id={this.state.cur.id}
                 displayname={this.state.cur.displayname}
                 images={this.state.cur.images}
                 dueDate={this.state.cur.dueDate.toLocaleString()}
                 nextInterval={this.state.cur.nextInterval}
                 controller={this}/>
+          {statusBar}
+        </View>
       );
     }
 
-    return this.state.cur.nextInterval === 0 ?
-      (<MemorizeCard id={this.state.cur.id}
+    if (this.state.cur.nextInterval === 0) {
+      return (
+        <View>
+          <MemorizeCard id={this.state.cur.id}
+            displayname={this.state.cur.displayname}
+            images={this.state.cur.images}
+            dueDate={this.state.cur.dueDate.toLocaleString()}
+            nextInterval={this.state.cur.nextInterval}
+            controller={this} />
+          {statusBar}
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <Card id={this.state.cur.id}
            displayname={this.state.cur.displayname}
            images={this.state.cur.images}
            dueDate={this.state.cur.dueDate.toLocaleString()}
            nextInterval={this.state.cur.nextInterval}
-           controller={this} />) :
-      (<Card id={this.state.cur.id}
-           displayname={this.state.cur.displayname}
-           images={this.state.cur.images}
-           dueDate={this.state.cur.dueDate.toLocaleString()}
-           nextInterval={this.state.cur.nextInterval}
-           controller={this} />);
+           controller={this} />
+        {statusBar}
+      </View>
+    );
   }
 
   render() {
@@ -261,8 +314,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#8cc136',
+    backgroundColor: '#e8e8e8',
   },
+  statusBar: {
+    flex: -1,
+    flexDirection: 'row',
+    marginTop: 60,
+  },
+  statusText: {
+    marginRight: 10,
+  }
 });
