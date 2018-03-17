@@ -144,21 +144,26 @@ export default class App extends Component
       }
     });
 
-    const numNew = Math.min(history.newPerDay() - history.numNewToday(), Object.keys(newPeople).length);
+    const reachedDailyReviewLimit = numDue + history.numReviewedToday() >= history.reviewsPerDay();
+    const numNew = reachedDailyReviewLimit ? 0 : Math.min(history.newPerDay() - history.numNewToday(), Object.keys(newPeople).length);
+
     this.setState({numNew: numNew, numDue: numDue, score: score});
+
     console.log("showCard Due: " + numDue);
     console.log("showCard history.numReviewedToday: " + history.numReviewedToday());
     console.log("showCard history.numNewToday: " + history.numNewToday());
+    console.log("showCard history.newPerDay: " + history.newPerDay());
+    console.log("showCard numNewLhs: " + (history.newPerDay() - history.numNewToday()));
+    console.log("showCard newPeople.length: " + Object.keys(newPeople).length);
+    console.log("showCard new: " + numNew);
 
     // Draw from new list
-    if (!history.reachedMaxNewToday() &&
-        numDue + history.numReviewedToday() < history.reviewsPerDay()) {
+    if (numNew > 0) {
       let firstKey = null;
       for (let k in newPeople) { firstKey = k; break; }
       let first = newPeople[firstKey];
       if (first) {
-        delete newPeople[firstKey];
-        console.log('Showing: ' + JSON.stringify(first));
+        console.log('Showing new: ' + JSON.stringify(first));
         this.setState({side:'front', cur:first});
         return;
       }
@@ -166,7 +171,6 @@ export default class App extends Component
 
     // Draw from seen list
     if (firstSeen) {
-      seenPeople.delete(firstSeen.id);
       console.log('Showing: ' + JSON.stringify(firstSeen));
       this.setState({side:'front', cur:firstSeen});
       return;
@@ -190,7 +194,11 @@ export default class App extends Component
   }
 
   async next(answer) { // TODO rename this and showCard
+
     const wasNew = this.state.cur.nextInterval === 0;
+    if (wasNew) {
+      delete newPeople[this.state.cur.id];
+    }
 
     if (!answer) { // incorrect
       this.state.cur.nextInterval = 0;
@@ -248,12 +256,14 @@ export default class App extends Component
     if (this.state.cur === null) {
       return (
         <View>
-          <Text style={Styles.title}>
-            Woohoo!{"\n"}
-            (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
-            Next card{"\n"}
-            {moment(this.state.nextCardDueDate).fromNow()}
-          </Text>
+          <View style={styles.donePage}>
+            <Text style={Styles.title}>
+              Woohoo!{"\n"}
+              (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
+              Next card{"\n"}
+              {moment(this.state.nextCardDueDate).fromNow()}
+            </Text>
+          </View>
           {statusBar}
         </View>
       );
@@ -318,9 +328,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#e8e8e8',
   },
+  donePage: {
+    marginTop: 100,
+    marginBottom: 60,
+  },
   statusBar: {
     flex: -1,
     flexDirection: 'row',
+    width: 300,
     marginTop: 60,
   },
   statusText: {
