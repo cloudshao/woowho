@@ -52,7 +52,6 @@ export default class Card extends Component {
         <Text style={Styles.title}>Who is this?</Text>
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
-            <Text style={styles.score}>&#11088; {this.props.nextInterval}</Text>
             <TouchableOpacity
               onPress={() => {this.spin(() => {this.props.controller.flipCard(true);})}}>
               <View style={styles.stretchButton}>
@@ -70,15 +69,10 @@ const styles = StyleSheet.create({
   stretchButton: {
     flex: -1,
     justifyContent: 'center',
-    backgroundColor: 'lightgrey',
+    backgroundColor: '#628cdb',
     width: 300,
     height: 100,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-  },
-  score: {
-    fontSize: 20,
-    marginBottom: 10,
-    color: 'darkgrey',
   },
 });

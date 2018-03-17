@@ -47,11 +47,18 @@ export default class AnswerCard extends Component {
                   {translateX: this.state.slideValue}]
     };
 
+    const score = this.props.nextInterval > 1 ? 
+        <Text style={styles.score}>
+          &#11088; {100*(this.props.nextInterval-1)}
+        </Text> :
+        null;
+
     return (
       <View>
         <Text style={Styles.title}>Were you right?</Text>
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
+            {score}
             <Text style={Styles.name}>{this.props.displayname}</Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -85,6 +92,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     width: 300,
     height: 100,
+  },
+  score: {
+    textAlign: 'left',
+    fontSize: 20,
+    marginLeft: 20,
+    color: '#555',
+    width: 300,
   },
   leftButton: {
     flex: -1,
