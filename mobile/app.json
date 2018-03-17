@@ -1,14 +1,16 @@
 {
   "expo": {
     "name": "WooWho",
-    "icon": "./app-icon.png",
     "version": "1.0.0",
+    "icon": "./assets/app-icon-ios.png",
     "slug": "woowho",
     "sdkVersion": "25.0.0",
     "ios": {
+      "icon": "./assets/app-icon-ios.png",
       "bundleIdentifier": "com.cloudshao.woowho"
     },
     "android": {
+      "icon": "./assets/app-icon-android.png",
       "package": "com.cloudshao.woowho"
     }
   }
