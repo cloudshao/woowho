@@ -27,7 +27,7 @@ export async function getAllPeople() {
       people = deserializeFromS3(blob);
       return people;
     }
-  ).catch((error) => { console.error(error); });
+  ).catch((error) => { console.log(error); throw error; });
 }
 
 export function deserializeFromS3(json) {

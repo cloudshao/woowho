@@ -12,21 +12,26 @@ class HistoryService {
 
   async get() {
     if (!this._initialized) {
-      const json = await AsyncStorage.getItem('@FT:historyState');
-      if (json !== null) {
-        const history = JSON.parse(json);
-        this._history.reviewed = history.reviewed
-          .map(d => new Date(d))
-          .filter(d => _isToday(d));
-        this._history.introduced = history.introduced
-          .map(d => new Date(d))
-          .filter(d => _isToday(d));
-        console.log('HistoryService.get: ' + JSON.stringify(this._history));
-      } else {
-        console.log('HistoryService.get - No history to load');
+      try {
+        const json = await AsyncStorage.getItem('@FT:historyState');
+        console.log('HistoryService.get result: ' + json);
+        if (json !== null) {
+          const history = JSON.parse(json);
+          this._history.reviewed = history.reviewed
+            .map(d => new Date(d))
+            .filter(d => _isToday(d));
+          this._history.introduced = history.introduced
+            .map(d => new Date(d))
+            .filter(d => _isToday(d));
+          console.log('HistoryService.get: ' + JSON.stringify(this._history));
+        } else {
+          console.log('HistoryService.get - No history to load');
+        }
+        this._initialized = true;
+      } catch (error) {
+        console.error(error);
+        throw error;
       }
-
-      this._initialized = true;
     }
     return this;
   }
@@ -69,7 +74,11 @@ function _isToday(date) {
   if (!(date <= now)) {
     throw 'historyservice._isToday: shouldnt be in the future';
   }
-  let thisMorning = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 4);
+
+  // "Today" starts at 4am. So "today" can actually be the previous day
+  const day = now.getHours() < 4 ? now.getDate()-1 : now.getDate();
+  let thisMorning = new Date(now.getFullYear(), now.getMonth(), day, 4);
+
   return date >= thisMorning;
 };
 

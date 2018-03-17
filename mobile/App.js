@@ -17,7 +17,7 @@ export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetra
 let allPeople = {};
 let newPeople = {};
 let seenPeople = new Map();
-let loading = true;
+let loaded = false;
 
 // Maps nextInterval -> next due time in milliseconds
 // First one is a special case handled in the code
@@ -41,12 +41,11 @@ async function save() {
   try {
     await AsyncStorage.setItem('@FT:saveState', serialized);
   } catch (error) {
-    console.error(error);
+    throw error;
   }
 }
 
 async function load() {
-  loading = true;
   try {
     // Load full list from S3
     allPeople = await getAllPeople();
@@ -69,10 +68,11 @@ async function load() {
     }, {});
     console.log('newPeople: ' + JSON.stringify(newPeople));
   } catch (error) {
-    console.error(error);
-  } finally {
-    loading = false;
+    console.log("Error in load: " + error);
+    throw error;
   }
+
+  loaded = true;
 }
 
 //AsyncStorage.clear(); 
@@ -84,17 +84,25 @@ export default class App extends Component
            nextCardDueDate:new Date(3000, 1),
            score: 0,
            numDue: 0,
-           numNew: 0};
+           numNew: 0,
+           error: null};
 
   constructor(props) {
     super(props);
 
-    load().then(() => {
-      this.showCard();
-    });
+    this._load();
 
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
     this._refreshDonePage = this._refreshDonePage.bind(this);
+  }
+
+  _load() {
+    load().then(() => {
+      this.showCard();
+    }).catch((error) => {
+      console.log("Setting error text: " + error);
+      this.setState({error:error});
+    });
   }
 
   componentDidMount() {
@@ -107,8 +115,18 @@ export default class App extends Component
 
   async _handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
-      if (this.state.cur === null && !loading) {
+      if (this.state.error != null) {
+        this.setState({error: null});
+      }
+
+      if (!loaded) {
+        this._load();
+        return;
+      }
+
+      if (this.state.cur === null) {
         this.showCard(); // Refresh to see if any new ones are due
+        return;
       }
     }
   }
@@ -219,11 +237,14 @@ export default class App extends Component
 
     seenPeople.set(this.state.cur.id, this.state.cur);
 
-    save();
-    // TODO handle potential errors here
-    const history = await HistoryService.get();
-    await wasNew ? history.addNewReview() : history.addReview();
-    this.showCard();
+    try {
+      save();
+      const history = await HistoryService.get().catch(e => console.error(e));
+      await wasNew ? history.addNewReview() : history.addReview();
+      this.showCard();
+    } catch (error) {
+      this.state.error = error;
+    }
   }
 
   flipCard() {
@@ -245,9 +266,23 @@ export default class App extends Component
         {due}
       </View>);
 
-    if (loading) {
+    if (this.state.error != null) {
       return (
         <View>
+          <View style={styles.donePage}>
+            <Text style={Styles.title}>
+              (&#65377;&bull;&#769;&#65087;&bull;&#768;&#65377;){"\n"}
+              Boohoo!{"\n\n"}
+              {this.state.error.toString()}
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    if (!loaded) {
+      return (
+        <View style={styles.loadingIndicator}>
           <ActivityIndicator size="large" color="black" />
         </View>
       );
@@ -258,8 +293,8 @@ export default class App extends Component
         <View>
           <View style={styles.donePage}>
             <Text style={Styles.title}>
-              Woohoo!{"\n"}
-              (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n\n"}
+              (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n"}
+              Woohoo!{"\n\n"}
               Next card{"\n"}
               {moment(this.state.nextCardDueDate).fromNow()}
             </Text>
@@ -327,6 +362,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#e8e8e8',
+  },
+  loadingIndicator: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   donePage: {
     marginTop: 100,
