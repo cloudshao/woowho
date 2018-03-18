@@ -41,13 +41,6 @@ body {
   max-height: 40px;
 }
 
-.youtube-embed {
-  position: absolute;
-  margin: auto;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
-
 .text {
   margin-left: auto;
   margin-right: auto;
