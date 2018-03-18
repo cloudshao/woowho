@@ -1,0 +1,66 @@
+.banner {
+  margin-top: 50px;
+  max-width: 500px;
+}
+
+body {
+  background-image: url("banner.png");
+  background-repeat: no-repeat;
+  background-size: 500px;
+  background-position: center 50px;
+  font-size: 1.2em;
+  font-family: Georgia, Times, "Times New Roman", serif;
+}
+
+.title {
+  text-align: center;
+  font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+}
+
+.top-spacer {
+  height: 300px;
+}
+
+.menubar {
+  text-align: center;
+  font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+}
+
+.menubar a {
+  color: black;
+}
+
+.appdownloads {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.applink {
+  margin-left: 5px;
+  margin-right: 5px;
+  max-height: 40px;
+}
+
+.youtube-embed {
+  position: absolute;
+  margin: auto;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.text {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 500px;
+}
+
+blockquote {
+  margin: 20px;
+  margin-left: 5%;
+  margin-right: 5%;
+  color: #777;
+}
+
+.q {
+  font-weight: bold;
+}
