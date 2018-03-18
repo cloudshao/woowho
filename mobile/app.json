@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "icon": "./assets/app-icon-ios.png",
     "slug": "woowho",
     "sdkVersion": "25.0.0",
