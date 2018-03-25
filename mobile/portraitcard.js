@@ -1,5 +1,7 @@
+import Image from 'react-native-image-progress';
+import ProgressCircle from 'react-native-progress/Circle';
 import React, {Component} from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { S3_URL } from './App.js';
 
 export default class PortraitCard extends Component {
@@ -17,6 +19,7 @@ export default class PortraitCard extends Component {
           {this.props.children}
         </View>
         <Image source={this.props.source}
+               indicator={ProgressCircle}
                style={styles.portrait} />
       </View>
     );

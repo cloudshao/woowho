@@ -22,6 +22,8 @@
     "expo": "^25.0.0",
     "moment": "^2.21.0",
     "react": "16.2.0",
-    "react-native": "0.52.0"
+    "react-native": "0.52.0",
+    "react-native-image-progress": "^1.1.0",
+    "react-native-progress": "^3.4.0"
   }
 }
