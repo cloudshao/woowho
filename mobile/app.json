@@ -1,8 +1,12 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "icon": "./assets/app-icon-ios.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover"
+    },
     "slug": "woowho",
     "sdkVersion": "25.0.0",
     "orientation": "portrait",
