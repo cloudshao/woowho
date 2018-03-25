@@ -136,7 +136,6 @@ class CardService {
         numDue++;
       }
 
-      console.log("draw compare " + JSON.stringify(p.dueDate) + " to " + JSON.stringify(closestDueDate));
       if (p.dueDate < closestDueDate) {
         closestDueDate = p.dueDate;
       }

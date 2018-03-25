@@ -18,14 +18,9 @@ class HistoryService {
         if (json !== null) {
           const history = JSON.parse(json);
           this._history.reviewed = history.reviewed
-            .map(d => new Date(d))
-            .filter(d => _isToday(d));
+            .map(d => new Date(d));
           this._history.introduced = history.introduced
-            .map(d => new Date(d))
-            .filter(d => _isToday(d));
-          console.log('HistoryService.get: ' + JSON.stringify(this._history));
-        } else {
-          console.log('HistoryService.get - No history to load');
+            .map(d => new Date(d));
         }
         this._initialized = true;
       } catch (error) {
@@ -33,6 +28,14 @@ class HistoryService {
         throw error;
       }
     }
+
+    // Exclude history from previous days
+    this._history.reviewed =
+      this._history.reviewed.filter(d => _isToday(d));
+    this._history.introduced =
+      this._history.introduced.filter(d => _isToday(d));
+    console.log('HistoryService.get: ' + JSON.stringify(this._history));
+
     return this;
   }
 
