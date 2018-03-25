@@ -39,8 +39,7 @@ export default class Card extends Component {
 
   render() {
 
-    const imageIdx = this.props.nextInterval % this.props.images.length;
-    const imageSrc = {uri: S3_URL + '/' + this.props.images[imageIdx]};
+    const imageSrc = {uri: S3_URL + '/' + this.props.image};
 
     let animStyle = {
       transform: [{rotateY: this.spinInterp},

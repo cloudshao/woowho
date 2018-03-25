@@ -2,10 +2,6 @@ import { AsyncStorage } from 'react-native';
 import HistoryService from './historyservice'
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
 
-// Maps nextInterval -> next due time in milliseconds
-// First one is a special case handled in the code
-const dueIntervals = [NaN, 1, 3, 8, 21, 49, 109, 245];
-
 //AsyncStorage.clear(); // For testing only
 
 function shuffle(array) {
@@ -101,23 +97,11 @@ class CardService {
     }
 
     if (!answer) { // incorrect
-      this._cur.nextInterval = 0;
-    }
-
-    // Figure out when this card is due next
-    const now = new Date();
-    if (this._cur.nextInterval === 0) { // Special case for first view
-      this._cur.nextInterval++;
-      this._cur.dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()+10); // 10 minutes
-    } else {
-      const dueIntervalIndex = Math.min(this._cur.nextInterval, dueIntervals.length);
-      const daysUntilDue = dueIntervals[dueIntervalIndex];
-      this._cur.nextInterval++;
-      const dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()+daysUntilDue, 4); // 4 am on that day
-      this._cur.dueDate = dueDate;
+      this._cur.reset();
     }
 
     // Write the card back into seen list
+    this._cur.advance();
     this._seenPeople.set(this._cur.id, this._cur);
 
     // Persist

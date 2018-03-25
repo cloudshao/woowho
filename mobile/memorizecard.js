@@ -41,14 +41,12 @@ export default class MemorizeCard extends Component {
   }
 
   render() {
-    const imageIdx = this.props.nextInterval % this.props.images.length;
-    const imageSrc = {uri: S3_URL + '/' + this.props.images[imageIdx]};
+    const imageSrc = {uri: S3_URL + '/' + this.props.image};
 
     let animStyle = {
       transform: [{translateX: this.state.slideValue}]
     };
 
-    // TODO loading icon for image
     return (
       <View>
         <Text style={Styles.title}>Memorize</Text>

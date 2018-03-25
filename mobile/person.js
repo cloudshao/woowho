@@ -1,6 +1,11 @@
 import { S3_URL } from './App.js';
 //const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
+// Maps nextInterval -> next due time in milliseconds
+// First few are special cases handled in the code
+const DUE_INTERVALS = [NaN, NaN, NaN, 1, 3, 8, 21, 49, 109, 245];
+const NUM_INITIAL = 3;
+
 export default class Person {
   constructor(id, displayname, images, nextInterval, dueDate) {
     this.displayname = displayname;
@@ -8,6 +13,32 @@ export default class Person {
     this.images = images;
     this.nextInterval = nextInterval === undefined ? 0 : nextInterval;
     this.dueDate = dueDate === undefined ? new Date() : dueDate;
+  }
+
+  advance() {
+    // Figure out when this card is due next
+    const now = new Date();
+    if (this.nextInterval < NUM_INITIAL) {
+      this.nextInterval++;
+      this.dueDate = now;
+    } else {
+      const dueIntervalIndex = Math.min(this.nextInterval, DUE_INTERVALS.length);
+      const daysUntilDue = DUE_INTERVALS[dueIntervalIndex];
+      this.nextInterval++;
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()+daysUntilDue, 4); // 4 am on that day
+      this.dueDate = dueDate;
+    }
+  }
+
+  reset() {
+    this.nextInterval = 0;
+  }
+
+  currentImage() {
+    let imageIndex = this.nextInterval - NUM_INITIAL;
+    imageIndex = Math.max(0, imageIndex);
+    imageIndex %= this.images.length;
+    return this.images[imageIndex];
   }
 }
 

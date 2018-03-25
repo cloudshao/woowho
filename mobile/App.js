@@ -179,7 +179,7 @@ export default class App extends Component
         <View>
           <AnswerCard id={this.state.cur.id}
                 displayname={this.state.cur.displayname}
-                images={this.state.cur.images}
+                image={this.state.cur.currentImage()}
                 dueDate={this.state.cur.dueDate.toLocaleString()}
                 nextInterval={this.state.cur.nextInterval}
                 controller={this}/>
@@ -193,7 +193,7 @@ export default class App extends Component
         <View>
           <MemorizeCard id={this.state.cur.id}
             displayname={this.state.cur.displayname}
-            images={this.state.cur.images}
+            image={this.state.cur.currentImage()}
             dueDate={this.state.cur.dueDate.toLocaleString()}
             nextInterval={this.state.cur.nextInterval}
             controller={this} />
@@ -206,7 +206,7 @@ export default class App extends Component
       <View>
         <Card id={this.state.cur.id}
            displayname={this.state.cur.displayname}
-           images={this.state.cur.images}
+           image={this.state.cur.currentImage()}
            dueDate={this.state.cur.dueDate.toLocaleString()}
            nextInterval={this.state.cur.nextInterval}
            controller={this} />
