@@ -5,6 +5,7 @@
     "icon": "./assets/app-icon-ios.png",
     "slug": "woowho",
     "sdkVersion": "25.0.0",
+    "orientation": "portrait",
     "ios": {
       "icon": "./assets/app-icon-ios.png",
       "bundleIdentifier": "com.cloudshao.woowho"
