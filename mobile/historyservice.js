@@ -75,7 +75,7 @@ class HistoryService {
 function _isToday(date) {
   const now = new Date();
   if (!(date <= now)) {
-    throw 'historyservice._isToday: shouldnt be in the future';
+    console.warn('historyservice._isToday: shouldnt be in the future: ' + date);
   }
 
   // "Today" starts at 4am. So "today" can actually be the previous day

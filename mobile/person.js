@@ -43,7 +43,11 @@ export default class Person {
 }
 
 export async function getAllPeople() {
-  const response = await fetch(S3_URL + '/profiles.json', {
+
+  const url = S3_URL + '/profiles.json';
+  console.log('getAllPeople requesting: ' + url);
+
+  const response = await fetch(url, {
     headers: {
       'Cache-Control': 'no-cache'
     }

@@ -1,6 +1,7 @@
 if (!__DEV__) {
-  //console.log = () => {};
-  //console.error = () => {};
+  console.log = () => {};
+  console.error = () => {};
+  console.warn = () => {};
 }
 
 import moment from 'moment'
@@ -48,7 +49,7 @@ export default class App extends Component
   _load() {
     load().then(() => {
       console.log("_load then");
-      this.showCard();
+      this._refreshCard();
     }).catch((error) => {
       console.error("Setting error text: " + error);
       this.setState({error:error});
@@ -75,24 +76,25 @@ export default class App extends Component
       }
 
       if (this.state.cur === null) {
-        this.showCard(); // Refresh to see if any new ones are due
+        this._refreshCard(); // Refresh to see if any new ones are due
       }
     }
   }
 
-  async showCard() {
+  async _refreshCard() {
     await this._refreshStats();
 
     const cardservice = await CardService.get();
     const card = cardservice.current();
     if (card) {
       this.setState({side:'front', cur:card});
-      console.log('showCard: ' + JSON.stringify(card));
+      console.log('_refreshCard: ' + JSON.stringify(card));
       return;
     }
 
     // No card to show. Refresh in a while
-    console.log('showCard none to show');
+    console.log('_refreshCard none to show');
+    this.setState({cur: null});
     setTimeout(this._refreshDonePage, 20000);
   }
 
@@ -101,7 +103,7 @@ export default class App extends Component
     if (this.state.cur == null) {
       const cardservice = await CardService.get();
       const card = await cardservice.draw();
-      await this.showCard(); // TODO error handle?
+      await this._refreshCard(); // TODO error handle?
     }
   }
 
@@ -110,7 +112,7 @@ export default class App extends Component
       const cardservice = await CardService.get();
       console.log("next advance");
       await cardservice.advance(answer);
-      await this.showCard();
+      await this._refreshCard();
     } catch (error) {
       console.error(error);
       this.setState({error: error});

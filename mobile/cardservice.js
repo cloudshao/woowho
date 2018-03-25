@@ -27,12 +27,13 @@ class CardService {
   numDue() { return this._numDue; }
   score() { return this._score; }
   closestDueDate() {
-    if (this.numNew() > 0) {
+    let closest = this._closestDueDate;
+    if (this._newPeople.size > 0) {
       const now = new Date();
       tomorrowMorning = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 4); // 4 am tomorrow
-      return tomorrowMorning;
+      closest = Math.min(closest, tomorrowMorning);
     }
-    return this._closestDueDate;
+    return closest;
   }
 
   constructor() {
