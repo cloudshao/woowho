@@ -12,39 +12,32 @@ export default class Person {
 }
 
 export async function getAllPeople() {
-  return fetch(S3_URL + '/profiles.json', {
+  const response = await fetch(S3_URL + '/profiles.json', {
     headers: {
       'Cache-Control': 'no-cache'
     }
-  }).then(
-    (response) => {
-      console.log(response);
-      return response.json();
-    }
-  ).then(
-    (blob) => {
-      console.log(blob);
-      people = deserializeFromS3(blob);
-      return people;
-    }
-  ).catch((error) => { console.log(error); throw error; });
+  });
+  const json = await response.json();
+  const people = deserializeFromS3(json);
+  return people;
 }
 
 export function deserializeFromS3(json) {
-  let people = {};
+  const people = new Map();
   for (let p of json) {
-    let person = new Person(p.id, p.displayname, p.images);
+    const person = new Person(p.id, p.displayname, p.images);
     if (p.nextInterval !== undefined) {
       throw 'UNEXPECTED';
     }
-    if (p.dueDate!== undefined) {
+    if (p.dueDate !== undefined) {
       throw 'UNEXPECTED';
     }
-    people[p.id] = person;
+    people.set(p.id, person);
   }
   return people;
 }
 
+// seen: Map of seen people
 export function summarizePeople(seen) {
   return [...seen.keys()].reduce((acc, k) => {
     let cur = seen.get(k);
@@ -55,13 +48,15 @@ export function summarizePeople(seen) {
   }, {});
 }
 
+// seen: Object of seen people
+// all: Map of all people
 export function desummarizePeople(seen, all) {
   let result = Object.keys(seen).reduce((acc, k) => {
-    if (!(k in all)) {
+    if (!all.has(k)) {
       return acc;
     }
 
-    let cur = all[k]; // XXX cshao: modifies entry in all list
+    let cur = all.get(k); // XXX: modifies entry in all list
     cur.dueDate = new Date(seen[k].dueDate);
     cur.nextInterval = seen[k].nextInterval;
     acc.set(k, cur);
