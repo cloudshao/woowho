@@ -30,7 +30,7 @@ export default class App extends Component
 {
   state = {side: 'front',
            cur: null,
-           nextCardDueDate:new Date(3000, 1),
+           closestDueDate:new Date(3000, 1),
            score: 0,
            numDue: 0,
            numNew: 0,
@@ -81,6 +81,8 @@ export default class App extends Component
   }
 
   async showCard() {
+    await this._refreshStats();
+
     const cardservice = await CardService.get();
     const card = cardservice.current();
     if (card) {
@@ -89,10 +91,8 @@ export default class App extends Component
       return;
     }
 
-    // No card
-    const closestDueDate = cardservice.closestDueDate();
-    console.log('showCard - empty, closestDueDate: ' + closestDueDate.toLocaleString());
-    this.setState({nextCardDueDate:closestDueDate, cur:null})
+    // No card to show. Refresh in a while
+    console.log('showCard none to show');
     setTimeout(this._refreshDonePage, 20000);
   }
 
@@ -119,6 +119,17 @@ export default class App extends Component
 
   flipCard() {
     this.setState({side: 'back'});
+  }
+
+  async _refreshStats() {
+    console.log("_refreshStats");
+    const cardservice = await CardService.get();
+    this.setState({
+      numNew: cardservice.numNew(),
+      numDue: cardservice.numDue(),
+      score: cardservice.score(),
+      closestDueDate: cardservice.closestDueDate(),
+    });
   }
 
   _getContentsToRender() {
@@ -166,7 +177,7 @@ export default class App extends Component
               (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n"}
               Woohoo!{"\n\n"}
               Next card{"\n"}
-              {moment(this.state.nextCardDueDate).fromNow()}
+              {moment(this.state.closestDueDate).fromNow()}
             </Text>
           </View>
           {statusBar}

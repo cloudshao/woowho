@@ -136,6 +136,7 @@ class CardService {
         numDue++;
       }
 
+      console.log("draw compare " + JSON.stringify(p.dueDate) + " to " + JSON.stringify(closestDueDate));
       if (p.dueDate < closestDueDate) {
         closestDueDate = p.dueDate;
       }
@@ -144,6 +145,7 @@ class CardService {
         score += p.nextInterval-1;
       }
     });
+    console.log("draw seenPeople: " + JSON.stringify([...this._seenPeople]));
 
     const reachedDailyReviewLimit = numDue + history.numReviewedToday() >= history.reviewsPerDay();
     const numNew = reachedDailyReviewLimit ? 0 : Math.min(history.newPerDay() - history.numNewToday(), this._newPeople.size);
@@ -160,6 +162,7 @@ class CardService {
     console.log("draw numNewLhs: " + (history.newPerDay() - history.numNewToday()));
     console.log("draw newPeople.length: " + this._newPeople.size);
     console.log("draw new: " + numNew);
+    console.log("draw closestDueDate: " + this._closestDueDate);
 
     // Draw from new list
     if (numNew > 0) {
