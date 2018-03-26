@@ -3,6 +3,8 @@ import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View, Image } fro
 import { S3_URL } from './App.js';
 import Styles from './styles';
 import PortraitCard from './portraitcard';
+import Analytics from './analytics';
+import { Event } from 'expo-analytics';
 
 export default class Card extends Component {
   state = {
@@ -52,7 +54,10 @@ export default class Card extends Component {
         <Animated.View style={animStyle}>
           <PortraitCard source={imageSrc}>
             <TouchableOpacity
-              onPress={() => {this.spin(() => {this.props.controller.flipCard(true);})}}>
+              onPress={() => {
+                this.spin(() => {this.props.controller.flipCard(true);})
+                Analytics.hit(new Event('Card', 'Flipped', this.props.id));
+              }}>
               <View style={styles.stretchButton}>
                 <Text style={Styles.buttonText}>&#10555;</Text>
               </View>

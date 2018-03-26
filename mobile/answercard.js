@@ -3,6 +3,8 @@ import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View, Image } fro
 import PortraitCard from './portraitcard';
 import Styles from './styles';
 import { S3_URL } from './App.js';
+import Analytics from './analytics';
+import { Event } from 'expo-analytics';
 
 export default class AnswerCard extends Component {
   state = {
@@ -63,6 +65,7 @@ export default class AnswerCard extends Component {
               <TouchableOpacity
                 onPress={() => {
                   this.slideAway(() => {this.props.controller.next(false);});
+                  Analytics.hit(new Event('Card', 'AnsweredIncorrect', this.props.id));
                 }}>
                 <View style={styles.leftButton}>
                   <Text style={Styles.buttonText}>&times;</Text>
@@ -71,6 +74,7 @@ export default class AnswerCard extends Component {
               <TouchableOpacity
                 onPress={() => {
                   this.slideAway(() => {this.props.controller.next(true);});
+                  Analytics.hit(new Event('Card', 'AnsweredCorrect', this.props.id));
                 }}>
                 <View style={styles.rightButton}>
                   <Text style={Styles.buttonText}>&#x2713;</Text>

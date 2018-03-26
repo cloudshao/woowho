@@ -12,6 +12,8 @@ import Card from './card'
 import CardService from './cardservice'
 import MemorizeCard from './memorizecard'
 import Styles from './styles'
+import Analytics from './analytics';
+import { ScreenHit, Event } from 'expo-analytics';
 
 export const S3_URL = "https://s3-ap-southeast-1.amazonaws.com/cloudshao-facetraining";
 
@@ -44,6 +46,8 @@ export default class App extends Component
 
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
     this._refreshDonePage = this._refreshDonePage.bind(this);
+
+    Analytics.hit(new ScreenHit('Review'));
   }
 
   _load() {
@@ -54,6 +58,7 @@ export default class App extends Component
       console.error("Setting error text: " + error);
       this.setState({error:error});
     });
+    Analytics.hit(new Event('S3Server', 'Load'));
   }
 
   componentDidMount() {
@@ -66,6 +71,8 @@ export default class App extends Component
 
   async _handleAppStateChange(nextAppState) {
     if (nextAppState === 'active') {
+      Analytics.hit(new Event('AppState', 'Activated'));
+
       if (this.state.error != null) {
         this.setState({error: null});
       }
@@ -121,6 +128,7 @@ export default class App extends Component
 
   flipCard() {
     this.setState({side: 'back'});
+    Analytics.hit(new Event('AppState', 'Activated'));
   }
 
   async _refreshStats() {
@@ -150,6 +158,7 @@ export default class App extends Component
       </View>);
 
     if (this.state.error != null) {
+      Analytics.hit(new Event('Error', 'Rendered', this.state.error.message));
       return (
         <View>
           <View style={styles.donePage}>
@@ -172,6 +181,10 @@ export default class App extends Component
     }
 
     if (this.state.cur === null) {
+      const now = new Date();
+      const millisUntilDue =
+        this.state.closestDueDate.valueOf() - now.valueOf();
+        Analytics.hit(new Event('DonePage', 'Rendered', 'TimeToNext', millisUntilDue));
       return (
         <View>
           <View style={styles.donePage}>
