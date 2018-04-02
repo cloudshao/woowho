@@ -60,7 +60,14 @@ class CardService {
         const summarized = JSON.parse(json);
         this._seenPeople = desummarizePeople(summarized, this._allPeople);
       }
+      console.log("_loadFromServer seenPeople: " + JSON.stringify([...this._seenPeople]));
 
+      // Shuffle seen list
+      let seenList = [...this._seenPeople.entries()];
+      seenList = shuffle(seenList);
+      this._seenPeople = new Map(seenList);
+
+      // Build unseen list by taking set difference
       const newKeys = [...this._allPeople.keys()].filter(k => !this._seenPeople.has(k));
       this._newPeople = newKeys.reduce((acc, k) => {
         acc.set(k, this._allPeople.get(k));
@@ -103,6 +110,7 @@ class CardService {
 
     // Write the card back into seen list
     this._cur.advance();
+    this._seenPeople.delete(this._cur.id);
     this._seenPeople.set(this._cur.id, this._cur);
 
     // Persist
@@ -117,23 +125,18 @@ class CardService {
   async draw() {
     const history = await HistoryService.get();
 
-    // TODO perf? We shouldn't need to shuffle to draw randomly
-    const now = new Date();
-    let seenKeys = [...this._seenPeople.keys()];
-    console.log("draw seenKeys: " + JSON.stringify(seenKeys));
-    seenKeys = shuffle(seenKeys);
-
     // TODO split this into separate function for readability
     // Figure out next due, total due and accumulated score in one loop
     let closestDueDate = new Date(3000, 1);
     let firstSeen = null;
     let numDue = 0;
     let score = 0;
-    seenKeys.forEach((k) => {
-      const p = this._seenPeople.get(k)
+    for (let [k, p] of this._seenPeople) {
 
       if (p.dueDate < new Date()) {
-        firstSeen = p;
+        if (firstSeen == null) {
+          firstSeen = p;
+        }
         numDue++;
       }
 
@@ -144,11 +147,14 @@ class CardService {
       if (p.nextInterval > 1) {
         score += p.nextInterval-1;
       }
-    });
-    console.log("draw seenPeople: " + JSON.stringify([...this._seenPeople]));
+    }
 
     const reachedDailyReviewLimit = numDue + history.numReviewedToday() >= history.reviewsPerDay();
-    const numNew = reachedDailyReviewLimit ? 0 : Math.min(history.newPerDay() - history.numNewToday(), this._newPeople.size);
+    let numNew = reachedDailyReviewLimit ? 0 : Math.min(history.newPerDay() - history.numNewToday(), this._newPeople.size);
+
+    // If total num cards is less than 5, then introduce that many new
+    const totalActive = numNew + this._seenPeople.size;
+    numNew = totalActive > 5 ? numNew : 5 - this._seenPeople.size;
 
     this._numNew = numNew;
     this._numDue = numDue;
