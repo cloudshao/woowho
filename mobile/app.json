@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "1.0.4",
+    "version": "2",
     "icon": "./assets/app-icon-ios.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -15,11 +15,13 @@
     },
     "ios": {
       "icon": "./assets/app-icon-ios.png",
-      "bundleIdentifier": "com.cloudshao.woowho"
+      "bundleIdentifier": "com.cloudshao.woowho",
+      "buildNumber": "2.0.0"
     },
     "android": {
       "icon": "./assets/app-icon-android.png",
-      "package": "com.cloudshao.woowho"
+      "package": "com.cloudshao.woowho",
+      "versionCode": 2
     }
   }
 }
