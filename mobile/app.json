@@ -1,15 +1,18 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "icon": "./assets/app-icon-ios.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover"
     },
     "slug": "woowho",
-    "sdkVersion": "25.0.0",
+    "sdkVersion": "26.0.0",
     "orientation": "portrait",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "icon": "./assets/app-icon-ios.png",
       "bundleIdentifier": "com.cloudshao.woowho"
