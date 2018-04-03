@@ -20,7 +20,7 @@
     },
     "android": {
       "icon": "./assets/app-icon-android.png",
-      "package": "com.cloudshao.woowho",
+      "package": "com.cloudshao.woowho2",
       "versionCode": 2
     }
   }
