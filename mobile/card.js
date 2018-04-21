@@ -5,6 +5,7 @@ import Styles from './styles';
 import PortraitCard from './portraitcard';
 import Analytics from './analytics';
 import { Event } from 'expo-analytics';
+import { Ionicons } from '@expo/vector-icons';
 
 export default class Card extends Component {
   state = {
@@ -59,7 +60,7 @@ export default class Card extends Component {
                 Analytics.hit(new Event('Card', 'Flipped', this.props.id));
               }}>
               <View style={styles.stretchButton}>
-                <Text style={Styles.buttonText}>&#10555;</Text>
+                <Ionicons style={Styles.buttonText} name="ios-eye" color="white" />
               </View>
             </TouchableOpacity>
           </PortraitCard>

@@ -5,6 +5,7 @@ import Styles from './styles';
 import { S3_URL } from './App.js';
 import Analytics from './analytics';
 import { Event } from 'expo-analytics';
+import { Feather } from '@expo/vector-icons';
 
 export default class MemorizeCard extends Component {
   state = {
@@ -61,7 +62,7 @@ export default class MemorizeCard extends Component {
                 Analytics.hit(new Event('Card', 'Memorized', this.props.id));
               }}>
               <View style={styles.stretchButton}>
-                <Text style={Styles.buttonText}>&#x2713;</Text>
+                <Feather style={Styles.buttonText} name="check" color="white" />
               </View>
             </TouchableOpacity>
           </PortraitCard>
