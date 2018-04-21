@@ -48,6 +48,8 @@ export default class App extends Component
     this._refreshDonePage = this._refreshDonePage.bind(this);
     this._refreshCard = this._refreshCard.bind(this);
 
+    this._timeouts = [];
+
     moment.updateLocale('en', {
       calendar : {
         sameDay : '[today at] LT',
@@ -116,7 +118,14 @@ export default class App extends Component
     this.setState({cur: null});
     const millisUntilDue =
       this.state.closestDueDate.valueOf() - (new Date()).valueOf();
-    setTimeout(this._refreshCard, Math.max(0, millisUntilDue));
+
+    // Clear previous timeouts so we don't dupilcate them
+    for (const id of this._timeouts) {
+      clearTimeout(id);
+    }
+    this._timeouts.push(
+      setTimeout(this._refreshCard, Math.max(0, millisUntilDue))
+    );
 
     // Start the done page refresh cycle
     this._refreshDonePage();
@@ -126,7 +135,7 @@ export default class App extends Component
     console.log('_refreshDonePage');
     if (this.state.cur == null) {
       this.forceUpdate();
-      setTimeout(this._refreshDonePage, 1000);
+      this._timeouts.push(setTimeout(this._refreshDonePage, 1000));
     }
   }
 
