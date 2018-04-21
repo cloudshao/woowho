@@ -171,6 +171,8 @@ class CardService {
     console.log("draw new: " + numNew);
     console.log("draw closestDueDate: " + this._closestDueDate);
 
+    Notifications.setBadgeNumberAsync(numNew + numDue);
+
     // Draw from new list
     if (numNew > 0) {
       let firstNew;
