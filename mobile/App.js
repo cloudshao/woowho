@@ -142,7 +142,7 @@ export default class App extends Component
       await Notifications.cancelAllScheduledNotificationsAsync();
       await Notifications.scheduleLocalNotificationAsync(
         {
-          title: 'Cards due for review',
+          title: 'You have new cards',
           body: 'Review them now',
           ios: { sound: true },
           android: { sound: true },
