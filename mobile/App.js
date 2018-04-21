@@ -7,7 +7,7 @@ if (!__DEV__) {
 import moment from 'moment'
 import { Permissions, Notifications } from 'expo';
 import React, {Component} from 'react';
-import { ActivityIndicator, AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
+import { ActivityIndicator, AsyncStorage, AppState, StyleSheet, StatusBar, Text, View, Button, Image } from 'react-native';
 import AnswerCard from './answercard'
 import Card from './card'
 import CardService from './cardservice'
@@ -303,6 +303,7 @@ export default class App extends Component
     console.log("Render: " + JSON.stringify(this.state.cur));
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="dark-content"/>
         {this._getContentsToRender()}
       </View>
     );
