@@ -1,5 +1,6 @@
+import { Notifications } from 'expo';
 import { AsyncStorage } from 'react-native';
-import HistoryService from './historyservice'
+import HistoryService from './historyservice';
 import Person, { getAllPeople, desummarizePeople, summarizePeople} from './person.js';
 
 //AsyncStorage.clear(); // For testing only

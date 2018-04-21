@@ -5,6 +5,7 @@ if (!__DEV__) {
 }
 
 import moment from 'moment'
+import { Permissions, Notifications } from 'expo';
 import React, {Component} from 'react';
 import { ActivityIndicator, AsyncStorage, AppState, StyleSheet, Text, View, Button, Image } from 'react-native';
 import AnswerCard from './answercard'
@@ -47,6 +48,7 @@ export default class App extends Component
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
     this._refreshDonePage = this._refreshDonePage.bind(this);
     this._refreshCard = this._refreshCard.bind(this);
+    this._lastRefresh = 0;
 
     this._timeouts = [];
 
@@ -103,6 +105,13 @@ export default class App extends Component
   }
 
   async _refreshCard() {
+    console.log('_refreshCard');
+    const now = new Date();
+    if (now.valueOf() - this._lastRefresh < 100) {
+      return;
+    }
+    this._lastRefresh = now.valueOf();
+
     await this._refreshStats();
 
     const cardservice = await CardService.get();
@@ -126,6 +135,21 @@ export default class App extends Component
     this._timeouts.push(
       setTimeout(this._refreshCard, Math.max(0, millisUntilDue))
     );
+
+    // Schedule notification for when the next card is due
+    const perm = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    if (perm.status === 'granted') {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      await Notifications.scheduleLocalNotificationAsync(
+        {
+          title: 'Cards due for review',
+          body: 'Review them now',
+          ios: { sound: true },
+          android: { sound: true },
+        },
+        { time: this.state.closestDueDate },
+      );
+    }
 
     // Start the done page refresh cycle
     this._refreshDonePage();
