@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "4",
+    "version": "5",
     "icon": "./assets/app-icon-ios.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -10,18 +10,21 @@
     "slug": "woowho",
     "sdkVersion": "26.0.0",
     "orientation": "portrait",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "notification": {
       "icon": "./assets/app-icon-greyscale.png"
     },
     "ios": {
       "icon": "./assets/app-icon-ios.png",
       "bundleIdentifier": "com.cloudshao.woowho",
-      "buildNumber": "4.0.0"
+      "buildNumber": "5.0.0"
     },
     "android": {
       "icon": "./assets/app-icon-android.png",
       "package": "com.cloudshao.woowho2",
-      "versionCode": 4
+      "versionCode": 5
     }
   }
 }
