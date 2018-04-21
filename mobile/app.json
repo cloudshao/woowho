@@ -10,6 +10,9 @@
     "slug": "woowho",
     "sdkVersion": "26.0.0",
     "orientation": "portrait",
+    "notification": {
+      "icon": "./assets/app-icon-greyscale.png"
+    },
     "ios": {
       "icon": "./assets/app-icon-ios.png",
       "bundleIdentifier": "com.cloudshao.woowho",
