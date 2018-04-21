@@ -46,6 +46,18 @@ export default class App extends Component
 
     this._handleAppStateChange = this._handleAppStateChange.bind(this);
     this._refreshDonePage = this._refreshDonePage.bind(this);
+    this._refreshCard = this._refreshCard.bind(this);
+
+    moment.updateLocale('en', {
+      calendar : {
+        sameDay : '[today at] LT',
+        nextDay : '[tomorrow]',
+        nextWeek : 'dddd',
+        lastDay : '[yesterday at] LT',
+        lastWeek : '[last] dddd [at] LT',
+        sameElse : 'L'
+      },
+    });
 
     Analytics.hit(new ScreenHit('Review'));
   }
@@ -92,7 +104,7 @@ export default class App extends Component
     await this._refreshStats();
 
     const cardservice = await CardService.get();
-    const card = cardservice.current();
+    const card = await cardservice.draw();
     if (card) {
       this.setState({side:'front', cur:card});
       console.log('_refreshCard: ' + JSON.stringify(card));
@@ -102,15 +114,19 @@ export default class App extends Component
     // No card to show. Refresh in a while
     console.log('_refreshCard none to show');
     this.setState({cur: null});
-    setTimeout(this._refreshDonePage, 20000);
+    const millisUntilDue =
+      this.state.closestDueDate.valueOf() - (new Date()).valueOf();
+    setTimeout(this._refreshCard, Math.max(0, millisUntilDue));
+
+    // Start the done page refresh cycle
+    this._refreshDonePage();
   }
 
   async _refreshDonePage() {
     console.log('_refreshDonePage');
     if (this.state.cur == null) {
-      const cardservice = await CardService.get();
-      const card = await cardservice.draw();
-      await this._refreshCard(); // TODO error handle?
+      this.forceUpdate();
+      setTimeout(this._refreshDonePage, 1000);
     }
   }
 
@@ -184,7 +200,16 @@ export default class App extends Component
       const now = new Date();
       const millisUntilDue =
         this.state.closestDueDate.valueOf() - now.valueOf();
-        Analytics.hit(new Event('DonePage', 'Rendered', 'TimeToNext', millisUntilDue));
+      Analytics.hit(new Event('DonePage', 'Rendered', 'TimeToNext', millisUntilDue));
+
+      const timeString = null;
+      if (millisUntilDue < 60000) {
+        timeString = "in " + Math.ceil(millisUntilDue / 1000) + " seconds";
+      } else if (millisUntilDue < 3.6e+6) {
+        timeString = "in " + Math.ceil(millisUntilDue / 60000) + " minutes";
+      } else {
+        timeString = moment(this.state.closestDueDate).calendar();
+      }
       return (
         <View>
           <View style={styles.donePage}>
@@ -192,7 +217,7 @@ export default class App extends Component
               (&#3665;&#707;&#821;&#7447;&#706;&#821;)&#1608;{"\n"}
               Woohoo!{"\n\n"}
               Next card{"\n"}
-              {moment(this.state.closestDueDate).fromNow()}
+              {timeString}
             </Text>
           </View>
           {statusBar}
