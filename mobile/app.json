@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WooWho",
-    "version": "5",
+    "version": "5.1",
     "icon": "./assets/app-icon-ios.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -14,7 +14,8 @@
       "fallbackToCacheTimeout": 0
     },
     "notification": {
-      "icon": "./assets/app-icon-greyscale.png"
+      "icon": "./assets/app-icon-greyscale.png",
+      "color": "#007DB8"
     },
     "ios": {
       "icon": "./assets/app-icon-ios.png",
