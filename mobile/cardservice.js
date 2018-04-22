@@ -63,11 +63,6 @@ class CardService {
       }
       console.log("_loadFromServer seenPeople: " + JSON.stringify([...this._seenPeople]));
 
-      // Shuffle seen list
-      let seenList = [...this._seenPeople.entries()];
-      seenList = shuffle(seenList);
-      this._seenPeople = new Map(seenList);
-
       // Build unseen list by taking set difference
       const newKeys = [...this._allPeople.keys()].filter(k => !this._seenPeople.has(k));
       this._newPeople = newKeys.reduce((acc, k) => {
@@ -125,6 +120,14 @@ class CardService {
   // Draw a new card without changing state
   async draw() {
     const history = await HistoryService.get();
+
+    // If we reached the bottom of the deck, shuffle
+    if (this._cur === null) {
+      console.log('draw Shuffling');
+      let seenList = [...this._seenPeople.entries()];
+      seenList = shuffle(seenList);
+      this._seenPeople = new Map(seenList);
+    }
 
     // TODO split this into separate function for readability
     // Figure out next due, total due and accumulated score in one loop
